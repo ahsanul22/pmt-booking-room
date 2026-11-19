@@ -3,14 +3,14 @@
 @section('content')
     <div class="mb-6 rounded-2xl border border-secondaryLight bg-surface p-5">
         <p class="text-lg font-semibold text-primaryDark">{{ $guest->name }} · {{ $guest->organization }}</p>
-        <p class="mt-2">Silakan temui resepsionis dan sebutkan nama serta instansi Anda untuk dibantu mengajukan booking.</p>
+        <p class="mt-2">Booking ruangan diajukan oleh pegawai yang mengundang Anda. Pegawai dapat mencantumkan nama Anda sebagai tamu rapat.</p>
         <p class="mt-2">Aktif sampai {{ $guest->expires_at->setTimezone(config('booking.timezone'))->format('d/m/Y H:i') }} WIB.</p>
     </div>
     <form method="GET" action="{{ route('guests.schedule') }}" class="mb-6 flex flex-wrap items-end gap-4">
         <x-workspace-field name="date" label="Tanggal (WIB)" type="date" :value="$date" required />
         <button type="submit" class="workspace-button">Tampilkan</button>
     </form>
-    <p class="mb-5 leading-7">Jadwal menampilkan ruangan umum di kantor tujuan. Jam Pending dan Approved belum dapat dipesan. Waktu kosong tetap perlu diperiksa resepsionis; ketersediaan diperiksa ulang saat pengajuan.</p>
+    <p class="mb-5 leading-7">Jadwal menampilkan ruangan umum di kantor tujuan. Jam Pending dan Approved belum dapat dipesan. Waktu kosong tetap perlu diperiksa pegawai saat mengajukan; ketersediaan diperiksa ulang saat pengajuan.</p>
     <div class="grid gap-5 md:grid-cols-2">
         @forelse($rooms as $room)
             <section class="min-w-0 rounded-2xl border border-slate-200 bg-surface p-5">

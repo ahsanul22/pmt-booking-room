@@ -29,14 +29,6 @@ class GuestRegistrationTest extends PostgresTestCase
         $this->assertSame('Koordinasi', $guest->purpose);
     }
 
-    private function receptionist(): User
-    {
-        $user = User::where('role', 'user')->firstOrFail();
-        $user->forceFill(['is_receptionist' => true])->save();
-
-        return $user;
-    }
-
     private function registerGuest(): GuestRegistration
     {
         $this->post('/tamu', ['name' => 'Tamu Uji', 'organization' => 'Instansi Uji', 'contact' => '08123456789', 'nip' => '0012345678', 'purpose' => 'Pertemuan koordinasi'])->assertRedirect('/tamu/jadwal');
@@ -61,47 +53,45 @@ class GuestRegistrationTest extends PostgresTestCase
         $this->assertDatabaseMissing('guest_registrations', ['id' => $guest->id]);
     }
 
-    public function test_guest_snapshot_survives_pruning_and_is_in_report_and_csv(): void
+    public function test_employee_lists_guest_names_shown_in_details_report_and_csv_but_not_guest_schedule(): void
     {
-        $guest = $this->registerGuest();
-        $user = $this->receptionist();
+        $this->registerGuest();
+        $user = User::where('role', 'user')->firstOrFail();
         $this->actingAs($user);
         $room = Room::where('code', 'DEMO-SM')->firstOrFail();
-        $input = ['date' => now(config('booking.timezone'))->addDay()->toDateString(), 'start_time' => '12:00', 'end_time' => '13:00', 'agenda' => 'Agenda rahasia', 'guest_reference' => $guest->reference];
+        $input = ['date' => now(config('booking.timezone'))->addDay()->toDateString(), 'start_time' => '12:00', 'end_time' => '13:00',
+            'agenda' => 'Agenda rahasia', 'guest_names' => "  Tamu Uji (Instansi Uji)\r\n\n Tamu Kedua  "];
         $token = (string) Str::uuid();
         $booking = app(BookingService::class)->submit($user, $room->id, $input, $token);
-        $this->assertSame('pending', $booking->status);
         $this->assertSame($user->id, $booking->user_id);
-        $this->assertSame($guest->name, $booking->guest_name);
-        $this->get('/tamu/jadwal?date='.$input['date'])->assertOk()->assertSee('12:00')->assertDontSee('Agenda rahasia')->assertDontSee($user->name);
-        $this->get('/my-bookings/'.$booking->id)->assertOk()->assertSee('Tamu Uji')->assertSee($user->name);
-        $this->travel(4)->days();
-        $this->artisan('guests:prune')->assertSuccessful();
+        $this->assertSame("Tamu Uji (Instansi Uji)\nTamu Kedua", $booking->guest_names);
+        // Guest names alone never force approval; the demo room status follows its own setting.
+        $this->assertSame($room->requires_approval ? 'pending' : 'approved', $booking->status);
         $this->assertSame($booking->id, app(BookingService::class)->submit($user, $room->id, $input, $token)->id);
-        $this->assertSame('Tamu Uji', $booking->fresh()->guest_name);
+        $this->get('/my-bookings/'.$booking->id)->assertOk()->assertSee('Nama Tamu')->assertSee('Tamu Kedua');
+        $this->get('/tamu/jadwal?date='.$input['date'])->assertOk()->assertSee('12:00')->assertDontSee('Agenda rahasia')->assertDontSee('Tamu Kedua');
         $this->actingAs(User::where('role', 'super_admin')->firstOrFail());
         $month = substr($input['date'], 0, 7);
-        $this->get('/admin/reports/monthly?month='.$month)->assertOk()->assertSee('Tamu Uji')->assertSee($user->name);
-        $this->get('/admin/reports/monthly/print?month='.$month)->assertOk()->assertSee('Tamu Uji');
+        $this->get('/admin/reports/monthly?month='.$month)->assertOk()->assertSee('Tamu Uji (Instansi Uji)');
         $csv = $this->get('/admin/reports/monthly/export?month='.$month)->assertOk()->streamedContent();
-        $this->assertStringContainsString('Tamu Uji', $csv);
-        $this->assertStringContainsString($user->name, $csv);
+        $this->assertStringContainsString('Tamu Uji (Instansi Uji); Tamu Kedua', $csv);
+        $this->assertStringNotContainsString('Kode Registrasi Tamu', $csv);
     }
 
-    public function test_guest_reference_is_revalidated_on_submit_and_wrong_branch_is_rejected(): void
+    public function test_booking_form_has_optional_guest_names_without_guest_dropdown(): void
     {
         $guest = $this->registerGuest();
-        $this->actingAs($this->receptionist());
+        $this->actingAs(User::where('role', 'user')->firstOrFail());
         $room = Room::where('code', 'DEMO-SM')->firstOrFail();
-        $guest->update(['branch_id' => Branch::create(['name' => 'Kantor Lain'])->id]);
         Livewire::test(BookingPreparationForm::class, ['roomId' => $room->id])
-            ->set('date', now(config('booking.timezone'))->addDay()->toDateString())
-            ->set('start_time', '12:00')->set('agenda', 'Pengajuan tamu')->set('guest_reference', $guest->reference)
-            ->call('submitBooking')->assertHasErrors('guest_reference');
+            ->assertSee('Nama Tamu (opsional)')->assertDontSee('Booking untuk')->assertDontSee($guest->name)
+            ->set('date', now(config('booking.timezone'))->addDay()->toDateString())->set('start_time', '12:00')
+            ->set('agenda', 'Rapat dengan tamu')->set('guest_names', str_repeat('a', 2001))
+            ->call('submitBooking')->assertHasErrors('guest_names');
         $this->assertDatabaseCount('bookings', 0);
     }
 
-    public function test_end_of_day_expiry_and_expired_guest_submission(): void
+    public function test_end_of_day_expiry(): void
     {
         config(['guests.expiry_mode' => 'end_of_day']);
         $this->travelTo(CarbonImmutable::parse('2026-10-20 16:00', 'Asia/Jakarta'));
@@ -109,12 +99,6 @@ class GuestRegistrationTest extends PostgresTestCase
         $this->assertSame('2026-10-20 17:00', $guest->expires_at->setTimezone('Asia/Jakarta')->format('Y-m-d H:i'));
         $this->travelTo(CarbonImmutable::parse('2026-10-20 17:00', 'Asia/Jakarta'));
         $this->get('/tamu/jadwal')->assertRedirect('/tamu');
-        $this->actingAs($this->receptionist());
-        $room = Room::where('code', 'DEMO-SM')->firstOrFail();
-        Livewire::test(BookingPreparationForm::class, ['roomId' => $room->id])
-            ->set('date', '2026-10-21')->set('start_time', '12:00')->set('agenda', 'Tamu kedaluwarsa')
-            ->set('guest_reference', $guest->reference)->call('submitBooking')->assertHasErrors('guest_reference');
-        $this->assertDatabaseCount('bookings', 0);
         $next = $this->registerGuest();
         $this->assertSame('2026-10-21 17:00', $next->expires_at->setTimezone('Asia/Jakarta')->format('Y-m-d H:i'));
         $this->travelBack();

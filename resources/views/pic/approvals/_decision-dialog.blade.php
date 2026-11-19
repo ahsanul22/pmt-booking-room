@@ -4,9 +4,10 @@
     <div id="approval-summary-{{ $booking->id }}" class="mt-5 space-y-2 break-words rounded-xl bg-background p-4 text-base leading-7">
         <p class="font-semibold text-primaryDark">{{ $booking->room->name }}</p>
         <p>{{ $booking->agenda }}</p>
-        @if($booking->guest_name)<p class="font-semibold">Peminta (Tamu): {{ $booking->guest_name }} &middot; {{ $booking->guest_organization }}</p><p>Kode tamu: {{ $booking->guest_reference }}</p>@endif
-        <p>{{ $booking->guest_name ? 'Diajukan oleh' : 'Pemohon' }}: {{ $booking->applicant->name }}</p><p>Unit: {{ $booking->unit_name ?? 'Belum ditentukan' }}</p><p>Tanggal: {{ $booking->date }}</p>
+        <p>Pemohon: {{ $booking->applicant->name }}</p><p>Unit: {{ $booking->unit_name ?? 'Belum ditentukan' }}</p><p>Tanggal: {{ $booking->date }}</p>
         <p>{{ substr($booking->start_time, 0, 5) }} &ndash; {{ substr($booking->end_time, 0, 5) }} WIB</p>
+        @if($booking->guest_names)<p class="whitespace-pre-line">Nama tamu:
+{{ $booking->guest_names }}</p>@endif
         <dl class="workspace-detail">@include('shared.meeting-preparation-details')</dl>
         <p class="whitespace-pre-line break-words">Catatan pemohon: {{ $booking->notes ?: 'Tidak ada catatan.' }}</p>
     </div>
@@ -19,7 +20,7 @@
         @csrf
         <input type="hidden" name="approval_id" value="{{ $booking->id }}">
         <input type="hidden" name="return_to" value="list">
-        @can('access-admin')<input type="hidden" name="branch_id" value="{{ request('branch_id') }}">@endcan
+        @can('access-super-admin')<input type="hidden" name="branch_id" value="{{ request('branch_id') }}">@endcan
         <input type="hidden" name="page" value="{{ $approvals->currentPage() }}">
         @include('shared.consumption-approval-fields')
         <label for="decision-notes-{{ $booking->id }}" class="block text-base font-semibold text-primaryDark">Catatan</label>

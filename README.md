@@ -1,6 +1,6 @@
 # Sistem Booking Ruang Rapat
 
-Aplikasi internal untuk membantu pegawai Pelindo Multi Terminal melihat jadwal dan mengajukan penggunaan ruang rapat. Admin mengelola data dan akses, sedangkan Room PIC menangani persetujuan untuk ruang yang menjadi tanggung jawabnya.
+Aplikasi internal untuk membantu pegawai Pelindo Multi Terminal melihat jadwal dan mengajukan penggunaan ruang rapat. Super Admin mengelola seluruh kantor/cabang, Admin mengelola satu kantor/cabang, sedangkan Room PIC menangani persetujuan untuk ruang yang menjadi tanggung jawabnya.
 
 > **Status:** aplikasi aktif dikembangkan. Beberapa kemampuan operasional, seperti pengiriman WhatsApp, memerlukan konfigurasi server tambahan. Lihat bagian [konfigurasi](#konfigurasi-opsional) dan [dokumentasi proyek](#dokumentasi).
 
@@ -15,7 +15,7 @@ Aplikasi internal untuk membantu pegawai Pelindo Multi Terminal melihat jadwal d
 - **Persetujuan:** booking yang memerlukan persetujuan masuk ke antrean PIC ruangan atau Admin. PIC/Admin dapat menyetujui atau menolak dengan alasan.
 - **Administrasi:** Admin mengelola akun, unit organisasi, kantor/cabang, lantai, fasilitas, ruangan, PIC, akses ruangan, serta kebutuhan approval.
 - **Laporan bulanan:** Admin dan PIC dapat melihat rekap berdasarkan bulan dan ruangan, mengunduh CSV, serta mencetak atau menyimpan PDF melalui browser.
-- **Pendataan tamu:** tamu dapat mengisi registrasi sementara dan melihat jadwal publik terbatas. Pengajuan booking tetap dilakukan oleh pegawai atau resepsionis.
+- **Pendataan tamu:** tamu dapat mengisi registrasi sementara dan melihat jadwal publik terbatas. Pengajuan booking dilakukan oleh pegawai, yang dapat mencantumkan nama tamu (opsional) pada form booking.
 - **Notifikasi WhatsApp (opsional):** antrean pesan dapat dikirim melalui Fonnte setelah token, penerima, dan scheduler dikonfigurasi.
 
 ## Alur penggunaan

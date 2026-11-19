@@ -49,6 +49,7 @@ class BookingPreparation
             'end_time' => ['required', 'date_format:H:i'],
             'agenda' => ['required', 'string', 'max:255'],
             'notes' => ['nullable', 'string', 'max:2000'],
+            'guest_names' => ['nullable', 'string', 'max:2000'],
             'meeting_preparation' => ['required', 'boolean', function ($attribute, $value, $fail) use ($room, $enabled) {
                 if ($enabled && ! $room?->allows_meeting_preparation) {
                     $fail('Persiapan rapat belum diaktifkan untuk ruangan ini.');
@@ -68,7 +69,7 @@ class BookingPreparation
             'max' => ':attribute maksimal :max karakter.',
         ], [
             'date' => 'Tanggal', 'start_time' => 'Jam mulai', 'end_time' => 'Jam selesai',
-            'agenda' => 'Agenda', 'notes' => 'Catatan',
+            'agenda' => 'Agenda', 'notes' => 'Catatan', 'guest_names' => 'Nama tamu',
             'participant_count' => 'Jumlah peserta', 'meeting_preparation' => 'Persiapan rapat', 'consumption_snack' => 'Konsumsi snack', 'consumption_meal' => 'Konsumsi makan',
         ]);
         $validator->after(function ($validator) use ($data) {

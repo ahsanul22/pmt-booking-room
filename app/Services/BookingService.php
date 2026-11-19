@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\Booking;
-use App\Models\GuestRegistration;
 use App\Models\Room;
 use App\Models\User;
 use Carbon\CarbonImmutable;
@@ -21,15 +20,16 @@ class BookingService
     {
         Validator::make(['token' => $token], ['token' => ['required', 'uuid']])->validate();
         // Only the expected form fields contribute to the idempotency fingerprint.
-        $input = array_intersect_key($input, array_flip(['date', 'start_time', 'end_time', 'agenda', 'notes', 'meeting_preparation', 'participant_count', 'consumption_snack', 'consumption_meal', 'it_support', 'series_hash', 'guest_reference']));
+        $input = array_intersect_key($input, array_flip(['date', 'start_time', 'end_time', 'agenda', 'notes', 'meeting_preparation', 'participant_count', 'consumption_snack', 'consumption_meal', 'it_support', 'series_hash', 'guest_names']));
         $input['agenda'] = is_string($input['agenda'] ?? null) ? trim($input['agenda']) : ($input['agenda'] ?? null);
         $input['notes'] = is_string($input['notes'] ?? null) ? trim($input['notes']) : ($input['notes'] ?? '');
         $input += ['it_support' => false, 'meeting_preparation' => false, 'participant_count' => null, 'consumption_snack' => false, 'consumption_meal' => false];
-        Validator::make($input, ['guest_reference' => ['nullable', 'string', 'max:20']])->validate();
-        $input['guest_reference'] = strtoupper(trim((string) ($input['guest_reference'] ?? '')));
+        Validator::make($input, ['guest_names' => ['nullable', 'string', 'max:2000']], [], ['guest_names' => 'Nama tamu'])->validate();
+        $input['guest_names'] = self::normalizeGuestNames($input['guest_names'] ?? null);
         $fingerprint = $input;
-        if ($input['guest_reference'] === '') {
-            unset($fingerprint['guest_reference']);
+        // Keep retries of submissions made before guest names were introduced valid.
+        if ($input['guest_names'] === null) {
+            unset($fingerprint['guest_names']);
         }
         // Keep retries of submissions made before preparation fields were introduced valid.
         if ($input['meeting_preparation'] === false && $input['participant_count'] === null && $input['consumption_snack'] === false && $input['consumption_meal'] === false) {
@@ -47,9 +47,6 @@ class BookingService
             $room = Room::lockForUpdate()->findOrFail($roomId);
             $user = User::lockForUpdate()->findOrFail($actor->id);
             Gate::forUser($user)->authorize('access-employee');
-            if ($input['guest_reference'] !== '') {
-                abort_unless($user->canHandleGuests(), 403);
-            }
             if (! $user->canAccessBranch($room->branch_id)) {
                 throw ValidationException::withMessages(['room' => 'Anda tidak memiliki izin akses ke lokasi ruangan ini.']);
             }
@@ -61,17 +58,9 @@ class BookingService
 
                 return $existing;
             }
-            $guest = null;
-            if ($input['guest_reference'] !== '') {
-                $guest = GuestRegistration::where('reference', $input['guest_reference'])
-                    ->where('branch_id', $room->branch_id)->where('expires_at', '>', now())->sharedLock()->first();
-                if (! $guest) {
-                    throw ValidationException::withMessages(['guest_reference' => 'Kode tamu tidak ditemukan, kedaluwarsa, atau berbeda kantor tujuan.']);
-                }
-            }
             $data = $this->preparation->validate($input, $room);
             $this->assertRoomAllowed($room, $user);
-            $requiresApproval = $guest !== null || $room->requires_approval || $data['consumption_snack'] || $data['consumption_meal'] || $data['it_support'];
+            $requiresApproval = $room->requires_approval || $data['consumption_snack'] || $data['consumption_meal'] || $data['it_support'];
             $approvalRoom = clone $room;
             $approvalRoom->requires_approval = $requiresApproval;
             $this->assertPicAvailable($approvalRoom);
@@ -79,9 +68,7 @@ class BookingService
 
             $booking = Booking::create([
                 'user_id' => $user->id, 'room_id' => $room->id,
-                'guest_name' => $guest?->name,
-                'guest_organization' => $guest?->organization,
-                'guest_reference' => $guest?->reference,
+                'guest_names' => $input['guest_names'],
                 'organizational_unit_id' => $user->organizational_unit_id,
                 'unit_name' => $user->organizationalUnit?->name,
                 'agenda' => $data['agenda'], 'date' => $data['date'],
@@ -100,6 +87,17 @@ class BookingService
 
             return $booking;
         }, 3);
+    }
+
+    /** One trimmed guest per line; blank input is stored as null. */
+    public static function normalizeGuestNames(mixed $value): ?string
+    {
+        if (! is_string($value)) {
+            return null;
+        }
+        $names = array_values(array_filter(array_map('trim', preg_split('/\R/u', $value) ?: []), fn ($name) => $name !== ''));
+
+        return $names === [] ? null : implode("\n", $names);
     }
 
     public function submitMany(User $actor, int $roomId, array $input, string $token, array $additionalDates): Booking
@@ -174,7 +172,8 @@ class BookingService
             $booking = Booking::lockForUpdate()->findOrFail($record->id);
             $reviewer = User::sharedLock()->findOrFail($actor->id);
             abort_unless($reviewer->canAccessBranch($room->branch_id), 403);
-            abort_unless($reviewer->is_active && ($reviewer->role === User::ROLE_SUPER_ADMIN
+            // Branch Admin decides within its branch; canAccessBranch above enforces the scope.
+            abort_unless($reviewer->is_active && (in_array($reviewer->role, [User::ROLE_ADMIN, User::ROLE_SUPER_ADMIN], true)
                 || ($reviewer->role === User::ROLE_ROOM_PIC && $room->pics()->whereKey($reviewer->id)->exists())), 403);
             abort_unless($booking->requires_approval, 403);
             if ($booking->status !== 'pending') {

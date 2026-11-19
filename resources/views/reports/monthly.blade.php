@@ -52,13 +52,14 @@
         <x-workspace-panel title="Rincian Booking" description="CSV dan versi cetak mencakup semua booking sesuai filter, bukan hanya halaman yang terlihat.">
             <div class="workspace-table" tabindex="0" role="region" aria-label="Rincian booking bulanan">
                 <table>
-                    <thead><tr><th scope="col">Tanggal / Jam WIB</th><th scope="col">Ruangan</th><th scope="col">Peminta / Pengaju / Unit</th><th scope="col">Agenda</th><th scope="col">Status</th><th scope="col">Peserta / Kebutuhan</th><th scope="col">Catatan</th></tr></thead>
+                    <thead><tr><th scope="col">Tanggal / Jam WIB</th><th scope="col">Ruangan</th><th scope="col">Pemohon / Unit / Tamu</th><th scope="col">Agenda</th><th scope="col">Status</th><th scope="col">Peserta / Kebutuhan</th><th scope="col">Catatan</th></tr></thead>
                     <tbody>
                         @forelse($bookings as $booking)
                             <tr>
                                 <td>{{ \Carbon\CarbonImmutable::parse($booking->date)->format('d/m/Y') }}<p class="mt-1 text-base">{{ substr($booking->start_time, 0, 5) }}–{{ substr($booking->end_time, 0, 5) }}</p></td>
                                 <td>{{ $booking->room->name }}<p class="mt-1 text-sm text-slate-600">{{ $booking->room->branch->name }}</p></td>
-                                <td>@if($booking->guest_name)<p class="font-semibold">Tamu: {{ $booking->guest_name }}</p><p>{{ $booking->guest_organization }} &middot; {{ $booking->guest_reference }}</p><p class="mt-2">Diajukan oleh: {{ $booking->applicant->name }}</p>@else{{ $booking->applicant->name }}@endif<p class="mt-1 text-base text-slate-600">{{ $booking->unit_name ?? 'Unit belum ditentukan' }}</p></td>
+                                <td>{{ $booking->applicant->name }}<p class="mt-1 text-base text-slate-600">{{ $booking->unit_name ?? 'Unit belum ditentukan' }}</p>@if($booking->guest_names)<p class="mt-2 whitespace-pre-line text-base">Tamu:
+{{ $booking->guest_names }}</p>@endif</td>
                                 <td>{{ $booking->agenda }}</td><td><x-booking-status :status="$booking->status" /></td>
                                 <td><dl class="space-y-2">@include('shared.meeting-preparation-details')</dl></td>
                                 <td>{{ $booking->notes ?: '—' }}<p class="mt-2">Keputusan: {{ $booking->decision_notes ?: '—' }}</p></td>

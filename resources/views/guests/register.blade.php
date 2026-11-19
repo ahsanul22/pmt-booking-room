@@ -7,7 +7,7 @@
             <div class="mb-8 text-center">
                 <p class="mb-3 text-sm font-bold uppercase tracking-[0.18em] text-primary">Selamat datang</p>
                 <h1 id="registration-title" class="text-3xl font-bold text-primaryDark sm:text-4xl">Pendataan Tamu</h1>
-                <p class="mx-auto mt-4 max-w-xl text-base leading-7 text-slate-600">Lengkapi identitas Anda untuk melihat jadwal ruangan. Resepsionis akan membantu pengajuan booking Anda.</p>
+                <p class="mx-auto mt-4 max-w-xl text-base leading-7 text-slate-600">Lengkapi identitas Anda untuk melihat jadwal ruangan. Pengajuan booking dilakukan oleh pegawai yang mengundang Anda.</p>
             </div>
             <x-form-feedback />
             <form method="POST" action="{{ route('guests.store') }}" class="grid gap-6 sm:grid-cols-2">

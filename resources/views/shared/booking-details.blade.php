@@ -7,16 +7,13 @@
         <dl class="workspace-detail">
             <div><dt>Kantor / Cabang</dt><dd>{{ $booking->room->branch?->name }}</dd></div>
             <div><dt>Ruangan</dt><dd>{{ $booking->room->name }}</dd></div>
-            @if($booking->guest_name)
-                <div><dt>Peminta (Tamu)</dt><dd>{{ $booking->guest_name }} &middot; {{ $booking->guest_organization }}</dd></div>
-                <div><dt>Kode Registrasi Tamu</dt><dd>{{ $booking->guest_reference }}</dd></div>
-            @endif
-            <div><dt>{{ $booking->guest_name ? 'Diajukan oleh (Pegawai)' : 'Pemohon' }}</dt><dd>{{ $booking->applicant->name }}</dd></div>
+            <div><dt>Pemohon</dt><dd>{{ $booking->applicant->name }}</dd></div>
             <div><dt>Unit Kerja saat Pengajuan</dt><dd>{{ $booking->unit_name ?? 'Belum ditentukan' }}</dd></div>
             <div><dt>Agenda</dt><dd>{{ $booking->agenda }}</dd></div>
             <div><dt>Tanggal</dt><dd>{{ $booking->date }}</dd></div>
             <div><dt>Waktu (WIB)</dt><dd>{{ substr($booking->start_time, 0, 5) }} &ndash; {{ substr($booking->end_time, 0, 5) }}</dd></div>
             @include('shared.meeting-preparation-details')
+            @if($booking->guest_names)<div><dt>Nama Tamu</dt><dd class="whitespace-pre-line">{{ $booking->guest_names }}</dd></div>@endif
             <div><dt>Catatan</dt><dd class="whitespace-pre-line">{{ $booking->notes ?? 'Tidak ada catatan.' }}</dd></div>
             @if($booking->decision_notes || $booking->rejection_reason)<div><dt>Catatan Keputusan</dt><dd class="whitespace-pre-line">{{ $booking->decision_notes ?? $booking->rejection_reason }}</dd></div>@endif
             @if($booking->decided_at)<div><dt>Waktu Keputusan (WIB)</dt><dd>{{ $booking->decided_at->timezone(config('booking.timezone'))->format('d/m/Y H:i') }}</dd></div>@endif
