@@ -16,7 +16,7 @@
             <x-workspace-status :active="$room->is_active" />
         </div>
         <nav aria-label="Bagian pengaturan ruangan" class="mt-5 flex flex-wrap gap-2 border-t border-slate-100 pt-4">
-            @foreach(['room-data' => 'Informasi', 'booking-options' => 'Opsi Lanjutan', 'facilities' => 'Fasilitas', 'pics' => 'PIC', 'access' => 'Akses'] as $section => $label)
+            @foreach(['room-data' => 'Informasi', 'booking-options' => 'Opsi Lanjutan', 'facilities' => 'Fasilitas', 'pics' => 'PIC'] as $section => $label)
                 <a href="#{{ $section }}" class="inline-flex min-h-[44px] items-center rounded-lg bg-background px-4 py-2 text-base font-semibold text-primaryDark hover:bg-secondaryLight/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary">{{ $label }}</a>
             @endforeach
         </nav>
@@ -31,7 +31,6 @@
         </div>
     </form>
     <section id="pics" class="mt-8 scroll-mt-6"><h2 class="text-xl font-bold text-primaryDark">PIC Ruangan</h2><p class="mb-5 mt-2 text-base leading-6 text-slate-600">Tentukan penanggung jawab untuk meninjau pengajuan ruangan ini.</p>@include('admin.rooms._pics')</section>
-    {{-- <section id="access" class="mt-8 scroll-mt-6"><h2 class="text-xl font-bold text-primaryDark">Akses Ruangan</h2><p class="mb-5 mt-2 text-base leading-6 text-slate-600">Kelola unit kerja yang diperbolehkan menggunakan ruangan.</p>@include('admin.rooms._access')</section> --}}
     <section class="mt-8 rounded-2xl border border-danger/30 bg-surface p-6">
         <h2 class="text-xl font-bold text-primaryDark">Hapus Ruangan</h2>
         <p class="mt-3 text-base text-slate-600">Ruangan tanpa booking dapat dihapus permanen. Jika sudah memiliki booking, nonaktifkan ruangan agar riwayat tetap tersimpan.</p>

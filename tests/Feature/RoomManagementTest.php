@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Http\Middleware\VerifyCsrfToken;
 use App\Models\Facility;
 use App\Models\Floor;
+use App\Models\OrganizationalUnit;
 use App\Models\Room;
 use App\Models\User;
 use App\Services\RoomService;
@@ -31,6 +32,7 @@ class RoomManagementTest extends PostgresTestCase
             'capacity' => 15, 'description' => 'Deskripsi pengujian', 'access_type' => 'restricted',
             'requires_approval' => '1', 'status' => 'available', 'is_active' => '1',
             'facility_ids' => Facility::orderBy('id')->limit(2)->pluck('id')->all(),
+            'organizational_unit_ids' => [OrganizationalUnit::orderBy('id')->value('id')],
         ], $overrides);
     }
 
@@ -83,7 +85,8 @@ class RoomManagementTest extends PostgresTestCase
         $data = $this->data(['floor_id' => $floor->id, 'facility_ids' => [$facility->id]]);
         $this->post($this->url('store'), $data)->assertSessionHasNoErrors()->assertSessionHas('status');
         $room = Room::where('code', 'TEST-ROOM')->firstOrFail();
-        unset($data['facility_ids']);
+        $this->assertDatabaseHas('room_unit_access', ['room_id' => $room->id, 'organizational_unit_id' => $data['organizational_unit_ids'][0]]);
+        unset($data['facility_ids'], $data['organizational_unit_ids']);
         $this->assertDatabaseHas('rooms', array_replace($data, ['id' => $room->id, 'is_active' => true, 'requires_approval' => true]));
         $this->assertDatabaseHas('facility_room', ['room_id' => $room->id, 'facility_id' => $facility->id]);
         $this->get($this->url('show', $room))->assertOk()->assertSee('Ruangan berhasil ditambahkan.')
@@ -169,6 +172,34 @@ class RoomManagementTest extends PostgresTestCase
             $this->assertNull($room->code);
             $this->assertSame(0, $room->facilities()->count());
         }
+    }
+
+    public function test_restricted_rooms_require_units_chosen_in_the_same_form(): void
+    {
+        $this->admin();
+        [$first, $second] = OrganizationalUnit::orderBy('id')->limit(2)->pluck('id')->all();
+        $this->get($this->url('create'))->assertOk()->assertSee('name="organizational_unit_ids[]"', false)->assertSee('data-room-access-units hidden', false);
+        foreach ([[], null] as $units) {
+            $this->from($this->url('create'))->post($this->url('store'), $this->data(['organizational_unit_ids' => $units]))
+                ->assertSessionHasErrors(['organizational_unit_ids' => 'Pilih minimal satu unit yang boleh memakai ruangan ini.']);
+        }
+        $this->assertDatabaseMissing('rooms', ['code' => 'TEST-ROOM']);
+        $this->post($this->url('store'), $this->data(['organizational_unit_ids' => [$first, $second]]))->assertSessionHasNoErrors();
+        $room = Room::where('code', 'TEST-ROOM')->firstOrFail();
+        $this->assertEqualsCanonicalizing([$first, $second], $room->allowedOrganizationalUnits()->pluck('organizational_units.id')->all());
+        $this->get($this->url('show', $room))->assertOk()->assertDontSee('data-room-access-units hidden', false)
+            ->assertSee('name="organizational_unit_ids[]" value="'.$first.'" checked', false);
+
+        $this->put($this->url('update', $room), $this->data(['organizational_unit_ids' => [$second]]))->assertSessionHasNoErrors();
+        $this->assertSame([$second], $room->allowedOrganizationalUnits()->pluck('organizational_units.id')->all());
+
+        // Switching to "all" ignores submitted units and keeps the stored list for later.
+        $data = $this->data(['access_type' => 'all']);
+        unset($data['organizational_unit_ids']);
+        $this->put($this->url('update', $room), $data)->assertSessionHasNoErrors();
+        $this->assertSame('all', $room->fresh()->access_type);
+        $this->assertSame([$second], $room->allowedOrganizationalUnits()->pluck('organizational_units.id')->all());
+        $this->post($this->url('store'), $this->data(['code' => 'TEST-ALL', 'access_type' => 'all', 'organizational_unit_ids' => ['bad']]))->assertSessionHasNoErrors();
     }
 
     public function test_operational_and_active_status_preserve_other_relationships(): void

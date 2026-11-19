@@ -19,3 +19,4 @@ import './schedule';
 
 import './approval';
 import './whatsapp-template';
+import './room-access';

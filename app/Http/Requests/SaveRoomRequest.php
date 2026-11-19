@@ -46,6 +46,18 @@ class SaveRoomRequest extends FormRequest
             'is_active' => ['required', 'boolean'],
             'facility_ids' => ['present', 'array'],
             'facility_ids.*' => ['bail', 'required', 'integer', 'distinct', 'exists:facilities,id'],
+            // A restricted room without units cannot be booked by anyone, so at least one is required.
+            // For "all" the stored list is left untouched and ignored.
+            'organizational_unit_ids' => ['exclude_unless:access_type,restricted', 'required', 'array', 'min:1'],
+            'organizational_unit_ids.*' => ['exclude_unless:access_type,restricted', 'bail', 'required', 'integer', 'distinct', 'exists:organizational_units,id'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'organizational_unit_ids.required' => 'Pilih minimal satu unit yang boleh memakai ruangan ini.',
+            'organizational_unit_ids.min' => 'Pilih minimal satu unit yang boleh memakai ruangan ini.',
         ];
     }
 
@@ -58,6 +70,7 @@ class SaveRoomRequest extends FormRequest
             'allows_it_support' => 'opsi teknisi IT',
             'requires_approval' => 'kebutuhan approval', 'status' => 'status operasional',
             'is_active' => 'status aktif', 'facility_ids' => 'fasilitas', 'facility_ids.*' => 'fasilitas',
+            'organizational_unit_ids' => 'unit akses', 'organizational_unit_ids.*' => 'unit akses',
         ];
     }
 }

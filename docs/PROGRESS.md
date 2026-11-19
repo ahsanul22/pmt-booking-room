@@ -2,6 +2,12 @@
 
 ## Last Update
 
+2026-11-19 - Unit akses ruangan restricted di form ruangan (DEC-064).
+
+- Checkbox unit organisasi ditambahkan ke form Tambah/Kelola Ruangan dan disimpan bersama data ruangan; tampil hanya saat Jenis Akses = Unit tertentu (`resources/js/room-access.js`). Ruangan restricted wajib minimal satu unit; untuk "Semua pegawai" input unit diabaikan dan daftar lama dipertahankan.
+- Bagian akses yang ter-comment di `admin/rooms/edit` serta view `admin/rooms/_access` dan `admin/rooms/access` dihapus. Endpoint `PUT /admin/rooms/{room}/access` tetap tersedia.
+- Verifikasi: `view:cache` dan `npm run build` berhasil. RoomManagementTest (termasuk kasus baru), SimplifiedWorkflowTest, ReadableRoutesTest, ControllerValidationTest: 21/21 lulus. FrontendSkeletonTest 7/7 lulus. Dua kasus SimplifiedWorkflowTest dan satu FrontendSkeletonTest yang sebelumnya gagal karena checkbox unit tidak dirender kini lulus. Browser belum diperiksa.
+
 2026-11-19 - Perapian struktur layout Blade (DEC-063).
 
 - Baru: `layouts/app.blade.php` (kerangka HTML tunggal), `layouts/workspace.blade.php`, `layouts/employee.blade.php`, `layouts/panel.blade.php`, `layouts/partials/{workspace-sidebar,workspace-topbar,employee-navbar,skip-link}.blade.php`. `layouts/public`, `visitor`, `report`, dan `auth/login` kini meng-extend `layouts.app`.

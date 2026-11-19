@@ -28,7 +28,8 @@ class RoomService
         return DB::transaction(function () use ($data, $room) {
             $record = $room ? Room::lockForUpdate()->findOrFail($room->id) : new Room;
             $facilityIds = $data['facility_ids'];
-            unset($data['facility_ids']);
+            $unitIds = $data['organizational_unit_ids'] ?? null;
+            unset($data['facility_ids'], $data['organizational_unit_ids']);
             if (! $record->exists && ! array_key_exists('capacity', $data)) {
                 $data['capacity'] = 0;
             }
@@ -38,6 +39,10 @@ class RoomService
             $record->fill($data);
             $record->save();
             $record->facilities()->sync($facilityIds);
+            // Units only apply to restricted rooms; for "all" the stored list is kept but unused.
+            if ($record->access_type === 'restricted' && $unitIds !== null) {
+                $record->allowedOrganizationalUnits()->sync($unitIds);
+            }
 
             return $record;
         });

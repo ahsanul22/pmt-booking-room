@@ -1,5 +1,11 @@
 # Decisions
 
+## DEC-064 - Unit akses ruangan restricted dipilih di form ruangan
+
+- Arahan pengguna 2026-11-19: Jenis Akses "Unit tertentu" tetap dipertahankan (contoh: ruang Direksi lantai 8). Sejak commit `cb63dac` bagian pilihan unit ter-comment, sehingga ruangan restricted baru tidak dapat diberi unit dan tidak dapat dibooking siapa pun.
+- Checkbox unit kini ada di form Tambah/Kelola Ruangan dan tersimpan bersama data ruangan; tampil hanya saat Jenis Akses = Unit tertentu (`resources/js/room-access.js`, server-rendered `hidden`). Ruangan restricted wajib minimal satu unit.
+- Saat Jenis Akses "Semua pegawai", input unit diabaikan (`exclude_unless`) dan daftar tersimpan dipertahankan tanpa dipakai, sesuai perilaku lama. Endpoint `PUT /admin/rooms/{room}/access` tetap ada untuk kompatibilitas; partial `_access` dan view `access` dihapus.
+
 ## DEC-063 - Satu kerangka HTML dan layout per peran
 
 - Arahan pengguna 2026-11-19: struktur view terlalu terpisah. `layouts/app.blade.php` menjadi satu-satunya file berisi `<html>`/`<head>`/`@vite`/page-loading; layout `workspace` (dulu `schedule`), `employee` (dulu `user`), `public`, `visitor`, `report`, dan halaman login meng-extend-nya.

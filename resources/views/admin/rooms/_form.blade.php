@@ -46,9 +46,33 @@
     <option value="1" @selected((string) old('is_active', isset($room) ? (int) $room->is_active : 1) === '1')>Aktif</option>
     <option value="0" @selected((string) old('is_active', isset($room) ? (int) $room->is_active : 1) === '0')>Nonaktif</option>
 </x-workspace-field>
-<p class="rounded-xl bg-background p-4 text-sm leading-6 text-slate-600 sm:col-span-2">Status operasional tidak menunjukkan ketersediaan jadwal. Pengaturan PIC dan unit akses disimpan melalui formulir masing-masing.</p>
+<p class="rounded-xl bg-background p-4 text-sm leading-6 text-slate-600 sm:col-span-2">Status operasional tidak menunjukkan ketersediaan jadwal. Pengaturan PIC disimpan melalui formulirnya sendiri.</p>
 </div>
 </x-workspace-panel>
+</div>
+@php($selectedUnits = array_map('strval', (array) old('organizational_unit_ids', $hasRoomInput ? [] : ($selectedUnitIds ?? []))))
+@php($unitErrors = array_merge($errors->get('organizational_unit_ids'), $errors->get('organizational_unit_ids.*')))
+<div id="access" class="scroll-mt-6">
+<fieldset data-room-access-units {{ old('access_type', data_get($room ?? null, 'access_type', 'all')) !== 'restricted' ? 'hidden' : '' }} class="min-w-0 rounded-2xl border border-slate-200 bg-surface p-5 shadow-sm sm:p-6" aria-describedby="access-hint{{ $unitErrors ? ' access-error' : '' }}">
+    <legend class="sr-only">Unit yang Boleh Memakai Ruangan</legend>
+    <h2 class="text-lg font-bold text-primaryDark">Unit yang Boleh Memakai Ruangan <span class="text-danger">*</span></h2>
+    <p id="access-hint" class="mt-2 text-base leading-6 text-slate-600">Hanya pegawai dari unit yang dicentang dapat mengajukan booking. Akses tidak otomatis mencakup unit turunannya, jadi centang setiap unit yang diizinkan.</p>
+    <div @class(['mt-5 grid gap-3 sm:grid-cols-2', 'xl:grid-cols-3' => $roomManagement ?? false])>
+    @forelse($units ?? [] as $unit)
+        <label class="flex min-h-[52px] cursor-pointer items-start gap-3 rounded-xl border border-slate-200 p-3 text-base text-slate-700 transition hover:border-secondary focus-within:ring-2 focus-within:ring-primary/30">
+        <input class="mt-0.5 h-4 w-4 shrink-0 accent-primary" type="checkbox" name="organizational_unit_ids[]" value="{{ $unit->id }}" @checked(in_array((string) $unit->id, $selectedUnits, true))><span class="min-w-0 break-words"><span class="block font-semibold text-primaryDark">{{ $unit->name }}</span><span class="mt-0.5 block text-sm text-slate-600">{{ $unit->type }}{{ $unit->is_active ? '' : ' - Nonaktif' }}</span></span></label>
+    @empty
+        <p>Belum ada unit organisasi yang dapat dipilih.</p>
+    @endforelse
+    </div>
+    @if($unitErrors)
+        <div id="access-error" role="alert" class="mt-3 space-y-1 text-base text-danger">
+            @foreach($unitErrors as $message)
+                @foreach((array) $message as $detail)<p>{{ $detail }}</p>@endforeach
+            @endforeach
+        </div>
+    @endif
+</fieldset>
 </div>
 <fieldset id="booking-options" class="scroll-mt-6 min-w-0 rounded-2xl border border-slate-200 bg-surface p-5 shadow-sm sm:p-6" aria-describedby="booking-options-hint">
     <legend class="sr-only">Opsi Lanjutan Booking</legend>

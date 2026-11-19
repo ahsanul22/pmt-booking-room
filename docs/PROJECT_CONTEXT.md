@@ -100,7 +100,7 @@ Data asli ruangan harus dapat dimasukkan melalui aplikasi. Jangan hardcode dafta
 Seluruh ruangan pada database proyek saat penugasan 2026-10-14 sudah terhubung ke akun aktif `Room PIC Demo` atas instruksi pengguna (DEC-047). Ruangan baru tetap memerlukan penugasan PIC melalui pengaturan Admin.
 
 - `all`: semua pegawai dapat mengajukan penggunaan ruang.
-- `restricted`: hanya organizational unit tertentu yang diperbolehkan menggunakan ruang.
+- `restricted`: hanya organizational unit tertentu yang diperbolehkan menggunakan ruang (contoh: ruang Direksi). Unit dipilih langsung di form ruangan dan wajib minimal satu (DEC-064).
 
 Default konsep sistem adalah ruang dapat digunakan seluruh pegawai, kecuali terdapat aturan khusus.
 

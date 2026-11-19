@@ -52,7 +52,6 @@ class RoomController extends Controller
         return view('admin.rooms.edit', $this->formOptions($request) + [
             'room' => $room->load(['floor', 'facilities', 'pics', 'allowedOrganizationalUnits']),
             'eligiblePics' => User::where('role', User::ROLE_ROOM_PIC)->whereHas('branches', fn ($query) => $query->where('branches.id', $room->branch_id))->orderBy('name')->get(),
-            'units' => OrganizationalUnit::orderBy('name')->get(),
             'selectedPicIds' => $room->pics->pluck('id')->all(),
             'selectedUnitIds' => $room->allowedOrganizationalUnits->pluck('id')->all(),
             'selectedFacilityIds' => $room->facilities->pluck('id')->all(),
@@ -98,6 +97,7 @@ class RoomController extends Controller
             'branches' => $this->branches($request),
             'floors' => Floor::orderBy('floor_number')->get(),
             'facilities' => Facility::orderBy('name')->get(),
+            'units' => OrganizationalUnit::orderBy('name')->get(),
         ];
     }
 }
