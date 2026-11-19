@@ -1,4 +1,4 @@
-# Pendataan dan booking tamu
+# Pendataan tamu dan nama tamu pada booking
 
 Tamu membuka `/tamu`, mengisi nama, instansi, NIP opsional, nomor kontak, dan tujuan kunjungan. Kantor/cabang tidak ditampilkan sebagai isian. Lokasi ditentukan server melalui `GUEST_BRANCH_ID`; jika belum diatur, memakai kantor dengan ID pertama dari master data.
 Session browser tersebut mendapat akses `/tamu/jadwal` sampai registrasinya kedaluwarsa.
@@ -7,29 +7,16 @@ ruangan aktif dengan akses `all` di kantor tujuan dan jam Pending/Approved, tanp
 agenda, identitas pemohon, unit, atau catatan rapat. Halaman jadwal perlu dimuat ulang
 untuk memperoleh kondisi terkini; waktu kosong bukan jaminan ketersediaan.
 
-Admin membuka Kelola User, memilih Kelola pada pegawai/PIC yang ditunjuk, mencentang
-**Petugas resepsionis**, lalu Simpan. Tidak ada role baru atau pengaturan lokasi tambahan;
-petugas memakai izin kantor/cabang yang sudah diberikan pada akun. Semua akun existing
-mulai tanpa izin resepsionis. Akun Admin tidak memperoleh hak booking dari checkbox ini.
+Pembaruan 2026-11-19 (DEC-062): fitur petugas resepsionis dan booking atas nama tamu
+dihapus karena booking tidak boleh dibuat atas nama tamu. Pegawai yang mengajukan booking
+dapat mengisi kolom **Nama Tamu (opsional)** di form booking, satu nama per baris.
+Kolom ini tersedia di semua ruangan tanpa pengaturan per ruangan dan tidak membuat booking
+membutuhkan approval. Isian tidak dihubungkan ke registrasi `/tamu`; registrasi tamu tetap
+hanya untuk melihat jadwal terbatas.
 
-Tamu cukup menyebutkan nama dan instansi kepada resepsionis. Pada form booking existing,
-petugas memilih tamu melalui dropdown **Booking untuk**; pilihan **Diri sendiri** tetap
-tersedia untuk booking pribadi. Pilihan tamu hanya registrasi aktif di lokasi ruangan
-tersebut, dengan waktu registrasi untuk membantu membedakan nama yang sama. Pegawai biasa
-tidak menerima daftar/field tamu dan tidak dapat mengirim referensi tamu lewat request
-buatan. Izin diperiksa ulang di server, termasuk setelah dicabut saat form masih terbuka.
-Tidak ada antrean permintaan atau menu administrasi baru.
-
-Izin pegawai, lokasi, restricted unit, status operasional, waktu, dan bentrok tetap
-diperiksa server. Booking atas nama tamu selalu membutuhkan PIC aktif dan persetujuan.
-Kode registrasi tetap identifier internal untuk snapshot/idempotensi, tanpa perlu
-ditunjukkan tamu atau diketik petugas.
-
-Booking menyimpan snapshot nama, instansi, dan kode tamu serta `user_id` pegawai
-pengaju. Detail booking, laporan bulanan layar, cetak/PDF, dan CSV menampilkan kedua
-pihak. Kontak, NIP, dan tujuan kunjungan tidak disalin ke booking/laporan; ketiganya mengikuti masa aktif registrasi. Booking existing tetap tampil
-seperti sebelumnya. Penghapusan registrasi tidak membatalkan booking atau menghapus
-snapshot. Retry token pengajuan yang sama tetap mengembalikan booking existing.
+Nama tamu tampil di detail booking, dialog approval, laporan bulanan (layar, cetak, CSV
+kolom Nama Tamu). Data lama dari fitur resepsionis (nama, instansi, kode tamu) dipindahkan
+ke kolom yang sama dengan format `Nama (Instansi)`; kode registrasi lama tidak disimpan lagi.
 
 ## Masa aktif dan penghapusan
 

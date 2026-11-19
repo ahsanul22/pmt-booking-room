@@ -1,5 +1,25 @@
 # Decisions
 
+## DEC-063 - Satu kerangka HTML dan layout per peran
+
+- Arahan pengguna 2026-11-19: struktur view terlalu terpisah. `layouts/app.blade.php` menjadi satu-satunya file berisi `<html>`/`<head>`/`@vite`/page-loading; layout `workspace` (dulu `schedule`), `employee` (dulu `user`), `public`, `visitor`, `report`, dan halaman login meng-extend-nya.
+- Sidebar, topbar, navbar pegawai, dan skip-link dipindah ke `layouts/partials/`. `layouts/panel` memilih layout berdasarkan role, menggantikan ekspresi `@extends` bersyarat di tiap halaman.
+- File tidak terpakai dihapus: `layouts/base`, `layouts/navigation`, `pic/approvals/history` (riwayat approval memakai `pic/approvals/index`). Tidak mengubah route, controller, data, atau tampilan; isi markup dipindahkan apa adanya.
+
+## DEC-062 - Hapus petugas resepsionis; nama tamu opsional pada booking
+
+- Arahan pengguna 2026-11-19: booking tidak boleh dibuat atas nama tamu, sehingga DEC-058 (checkbox Petugas resepsionis, dropdown Booking untuk, snapshot guest_name/guest_organization/guest_reference) dibatalkan. Kolom users.is_receptionist dihapus.
+- Pegawai dapat mengisi `bookings.guest_names` (teks, maks. 2000 karakter, satu nama per baris, dirapikan server). Tidak ada saklar per ruangan: berbeda dengan peserta/konsumsi yang tergantung fasilitas ruangan, daftar tamu adalah informasi rapat. Nama tamu tidak memicu approval dan tidak terhubung ke registrasi `/tamu`.
+- Data lama dipindahkan ke guest_names sebagai `Nama (Instansi)`; kode registrasi lama dibuang. Registrasi dan jadwal tamu (DEC-056/057) tetap berlaku.
+
+## DEC-061 - Role Admin per kantor/cabang dan Super Admin
+
+- Arahan pengguna 2026-11-19: role menjadi User, Room PIC, Admin, Super Admin. Identifier `super_admin` tetap dipakai dan kini berlabel Super Admin (akses semua lokasi). Role baru `admin` (label Admin) mengelola tepat satu kantor/cabang, disimpan melalui pivot branch_user yang sama; validasi mewajibkan tepat satu lokasi.
+- Gate: `access-admin` = Admin + Super Admin; `access-super-admin` = Super Admin. `access-pic` dan `access-general` ikut menyertakan Admin; `access-employee` tidak, sehingga Admin tidak booking pribadi (sama seperti Super Admin).
+- Admin cabang mengelola operasional lokasinya: ruangan (termasuk PIC dan akses unit), semua booking, approval, jadwal, laporan, dashboard, serta akun User/Room PIC yang memiliki izin lokasinya. Batas diterapkan di query (`Room::visibleTo`, `canAccessBranch`) dan Gate `manage-room`/`manage-user`, bukan hanya di Blade.
+- Admin cabang tidak dapat membuat/mengubah akun Admin/Super Admin, tidak memilih lokasi akun (akun baru otomatis mendapat lokasinya; izin lokasi akun existing tetap), dan tidak memiliki dropdown lokasi.
+- Master data global hanya Super Admin: Kantor & Cabang, Lantai, Fasilitas, Unit Organisasi, dan Notifikasi WhatsApp. Penerima WhatsApp approval_request tetap akun Super Admin; perluasan ke Admin cabang belum diputuskan.
+
 ## DEC-060 - Pengaturan permintaan teknisi IT per ruangan
 
 - Admin dapat mengaktifkan atau menonaktifkan permintaan teknisi IT pada form booking untuk tiap ruangan. Ruangan existing tetap aktif saat migrasi agar perilaku yang berjalan tidak berubah.

@@ -16,7 +16,7 @@ Website internal perusahaan untuk membantu pegawai:
 - Mengelola approval untuk ruang tertentu.
 - Melihat status dan riwayat booking.
 
-Sistem digunakan untuk kebutuhan internal perusahaan. Beranda sebelum login hanya memperkenalkan sistem. Jadwal internal dan pengajuan booking memerlukan akun pegawai aktif. Pengecualian DEC-056: tamu dengan registrasi sementara aktif dapat melihat jadwal khusus tamu; pengajuan tetap dibantu pegawai/resepsionis.
+Sistem digunakan untuk kebutuhan internal perusahaan. Beranda sebelum login hanya memperkenalkan sistem. Jadwal internal dan pengajuan booking memerlukan akun pegawai aktif. Pengecualian DEC-056: tamu dengan registrasi sementara aktif dapat melihat jadwal khusus tamu; booking diajukan pegawai, yang dapat mencantumkan nama tamu (DEC-062).
 
 ## Scope yang Tidak Dikerjakan Saat Ini
 
@@ -59,7 +59,13 @@ PIC dapat:
 
 PIC tidak mengelola seluruh master data sistem.
 
-### Admin
+### Super Admin dan Admin (DEC-061)
+
+Super Admin (identifier `super_admin`) mengakses seluruh kantor/cabang dan satu-satunya yang mengelola master data global: Kantor & Cabang, Lantai, Fasilitas, Unit Organisasi, dan Notifikasi WhatsApp.
+
+Admin (identifier `admin`) mengelola tepat satu kantor/cabang: ruangan beserta PIC dan akses unit, booking, approval, jadwal, laporan, dan akun User/Room PIC di lokasinya. Admin tidak mengelola akun Admin/Super Admin dan tidak mengubah izin lokasi akun.
+
+Daftar kemampuan di bawah berlaku untuk Super Admin di semua lokasi dan untuk Admin di lokasinya sendiri.
 
 Dapat:
 
@@ -189,8 +195,8 @@ Hal berikut belum diputuskan dan bukan aturan implementasi:
 
 ## Pendataan Tamu (DEC-056)
 
-Tamu scan QR ke /tamu, mencatat nama, instansi, NIP opsional, kontak dan tujuan kunjungan, lalu melihat jam penggunaan ruangan umum di kantor itu selama masa aktif. Petugas resepsionis yang ditunjuk Admin memilih nama tamu pada form booking; PIC menyetujui. Registrasi kedaluwarsa dihapus, snapshot nama/instansi/kode peminta pada booking tetap tersedia bersama pegawai pengaju dalam laporan bulanan layar/CSV/cetak. Default sementara tiga hari, opsi pukul 17.00 melalui config; lihat docs/GUESTS.md.
+Tamu scan QR ke /tamu, mencatat nama, instansi, NIP opsional, kontak dan tujuan kunjungan, lalu melihat jam penggunaan ruangan umum di kantor itu selama masa aktif. Booking diajukan pegawai; nama tamu dapat dicantumkan pada kolom opsional (DEC-062). Registrasi kedaluwarsa dihapus. Default sementara tiga hari, opsi pukul 17.00 melalui config; lihat docs/GUESTS.md.
 
 Penyesuaian DEC-057: kantor/cabang tidak lagi dipilih tamu; lokasi mengikuti konfigurasi server GUEST_BRANCH_ID atau kantor ID pertama dari master data. NIP dan tujuan ikut expiry registrasi, tidak menambah snapshot laporan.
 
-DEC-058: penunjukan resepsionis cukup satu checkbox pada Kelola User, tanpa role baru. Hanya user/PIC aktif yang ditunjuk dapat memilih tamu aktif di lokasi ruangan; pegawai biasa hanya booking pribadi. Tamu menyebut nama/instansi, tanpa kode manual atau antrean permintaan.
+DEC-062 (menggantikan DEC-058): fitur petugas resepsionis dihapus; booking tidak dibuat atas nama tamu. Pegawai dapat mengisi Nama Tamu (opsional) pada form booking, tanpa saklar per ruangan dan tanpa memicu approval.

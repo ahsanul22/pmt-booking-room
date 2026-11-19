@@ -2,6 +2,30 @@
 
 ## Last Update
 
+2026-11-19 - Perapian struktur layout Blade (DEC-063).
+
+- Baru: `layouts/app.blade.php` (kerangka HTML tunggal), `layouts/workspace.blade.php`, `layouts/employee.blade.php`, `layouts/panel.blade.php`, `layouts/partials/{workspace-sidebar,workspace-topbar,employee-navbar,skip-link}.blade.php`. `layouts/public`, `visitor`, `report`, dan `auth/login` kini meng-extend `layouts.app`.
+- 26 halaman `@extends('layouts.schedule')` menjadi `layouts.workspace`; 9 halaman lintas role (dashboard, jadwal, ruangan, booking pribadi, error 403/404) menjadi `layouts.panel`. View composer jumlah approval dipindah ke partial sidebar.
+- Dihapus: `layouts/schedule`, `layouts/user`, `layouts/base`, `layouts/navigation`, `pic/approvals/history` (tidak pernah dirender).
+- Verifikasi: `view:cache` berhasil. Smoke test HTTP lokal: `/`, `/login`, `/tamu`, halaman pegawai (dashboard, ruangan, jadwal, riwayat, form booking, 403, 404) dan halaman PIC (dashboard, jadwal, ruangan saya, approval, riwayat, laporan, cetak, booking ruangan) berstatus 200/403/404 sesuai, masing-masing tepat satu `<html>`, layout dan judul sesuai role. Ekstensi Chrome tidak terhubung, jadi tampilan visual belum diperiksa di browser.
+
+2026-11-19 - Notifikasi approval untuk Admin cabang dan migration.
+
+- Super Admin dapat memilih akun Admin maupun Super Admin sebagai penerima WhatsApp pengajuan approval. Admin cabang hanya menerima pengajuan dari lokasinya (filter `canAccessBranch` existing), dengan tautan review ke `/admin/approvals`. Opsi penerima menampilkan label role.
+- Migration `2026_11_19_000001` dijalankan ke database aplikasi atas izin pengguna. Sebelum migration: tidak ada booking dengan data tamu lama, ada 1 akun bertanda resepsionis. Sesudahnya: constraint `users_role_check` menerima `admin`, kolom `guest_names` ada, dan kolom lama sudah terhapus.
+- Verifikasi: BranchAdminTest 6/6 lulus. WhatsappNotificationTest dan WhatsappManagementTest 21/22 lulus; yang gagal (`user number normalizes…`) juga gagal di HEAD sebelum perubahan.
+- Catatan: database bersama berisi 11 schema `foundation_test_*` sisa run test yang dihentikan. Belum dihapus karena database dipakai tim.
+- Akun Super Admin `admin@example.test` di database bersama tidak lagi memakai password development, sehingga halaman Super Admin hanya diverifikasi lewat test otomatis.
+
+2026-11-19 - Role Admin per kantor/cabang, Super Admin, dan nama tamu opsional (DEC-061, DEC-062).
+
+- Role baru `admin` (Admin) mengelola satu kantor/cabang; `super_admin` kini berlabel Super Admin. Migration `2026_11_19_000001` memperluas check constraint role. Gate baru `access-super-admin`, `manage-room`, `manage-user`; route Kantor & Cabang, Lantai, Fasilitas, Unit Organisasi, Notifikasi dipindah ke grup Super Admin.
+- Admin cabang: ruangan/PIC/akses, booking, approval, jadwal, laporan, dashboard, dan akun User/Room PIC dibatasi ke lokasinya di query dan Gate. Tanpa dropdown lokasi; akun baru otomatis mendapat lokasinya; izin lokasi akun lama tidak berubah. Super Admin wajib memberi tepat satu lokasi saat membuat Admin.
+- Fitur petugas resepsionis dihapus (kolom users.is_receptionist, dropdown Booking untuk, snapshot guest_name/guest_organization/guest_reference). Diganti kolom `bookings.guest_names` (Nama Tamu, opsional, satu per baris) di form booking semua ruangan; tampil di detail, dialog approval, laporan dan CSV. Data lama dipindahkan sebagai `Nama (Instansi)`. Teks halaman tamu disesuaikan.
+- Test baru `BranchAdminTest` (5 kasus); GuestRegistrationTest ditulis ulang untuk nama tamu; ReceptionistPermissionTest dihapus.
+- Verifikasi aktual: PHP lint, Pint, route:list, view:cache/clear, `npm run build` berhasil. Test perlu `APP_ENV=testing` karena shell mengekspor `.env`. BranchAdminTest 4/5 lulus pada run pertama; kasus kelola pengguna gagal (403 dari filter Livewire di daftar pengguna), lalu diperbaiki dan lulus 5/5 pada run paralel. GuestRegistrationTest 6/6 dan ControllerValidationTest 4/4 lulus. Run paralel 4 grup (235 kasus): 193 lulus; 34 gagal karena batas koneksi Supabase (pool_size 15) dan 8 gagal karena assertion. Kedelapannya juga gagal pada kode HEAD sebelum perubahan (worktree terpisah), jadi sudah ada sebelumnya: AuthenticationTest login tiga akun, AuthorizationTest admin pages & missing unit, RoomAssignmentTest multiple pics, WhatsappManagementTest user number, RoomCatalogTest initial load, SimplifiedWorkflowTest 2 kasus. Run ulang berurutan: MonthlyReportTest 5/5 dan ListingFiltersTest 4/4 lulus, lalu proses dihentikan sistem karena memori rendah. Belum diulang: RoomAssignmentTest (6), BranchAndItSupportTest (3), FrontendSkeletonTest (4), BranchAccessTest (1), DatabaseFoundationTest (6), HomeAndScheduleTest (7).
+- Migration belum dijalankan ke database aplikasi. Browser desktop/mobile belum diperiksa.
+
 2026-10-26 - Pengaturan teknisi IT per ruangan dan penyederhanaan PIC.
 
 - Admin dapat mengaktifkan/menonaktifkan opsi permintaan teknisi IT per ruangan. Ruangan lama tetap mengizinkannya; form booking menyembunyikan opsi bila dinonaktifkan dan server menolak permintaan yang dipaksakan.

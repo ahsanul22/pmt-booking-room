@@ -9,13 +9,28 @@ Buka `/schedule` (pegawai/PIC) atau `/admin/schedule` (admin) setelah login. Pel
 | File | Fungsi |
 | --- | --- |
 | `resources/views/shared/schedule.blade.php` | Komposisi konten, card, tombol, panel agenda, empty state |
-| `resources/views/layouts/schedule.blade.php` | Sidebar, header akun, navigasi mobile, footer |
+| `resources/views/layouts/workspace.blade.php` + `layouts/partials/workspace-sidebar.blade.php`, `workspace-topbar.blade.php` | Sidebar, header akun, navigasi mobile, footer |
 | `resources/views/components/schedule-icon.blade.php` | Ikon SVG lokal |
 | `resources/css/app.css` | Entry Tailwind, komponen navigasi, fokus keyboard |
 | `resources/js/schedule.js` | Menu sidebar mobile; kalender kini Livewire RoomSchedule (DEC-030) |
 | `tailwind.config.js` | Sumber token warna dan font |
 
 Ikuti gaya visual referensi, bukan isi kalendernya. Layout jadwal saat ini mempunyai judul, breadcrumb, dan menu aktif khusus jadwal. Jangan langsung mewariskannya pada halaman lain tanpa menyesuaikan bagian tersebut. Jika perlu dipakai bersama, ekstrak/parameterkan bagian yang diperlukan dalam lingkup task, pertahankan tampilan jadwal, dan catat file bersama yang berubah. Tidak perlu migrasi semua halaman sekaligus.
+
+## Struktur layout (2026-11-19)
+
+```
+layouts/app.blade.php          satu-satunya <html>/<head>, @vite, page-loading
+├── layouts/workspace          PIC, Admin, Super Admin: sidebar + topbar
+├── layouts/employee           User: navbar atas
+├── layouts/panel              halaman lintas role: pilih employee/workspace/public otomatis
+├── layouts/public             beranda dan error untuk tamu
+├── layouts/visitor            /tamu
+└── layouts/report             cetak / PDF laporan
+layouts/partials/              workspace-sidebar, workspace-topbar, employee-navbar, skip-link
+```
+
+Halaman hanya menulis `@extends` satu nama layout lalu mengisi `title`, `breadcrumb` (workspace), dan `content`. Tambahan di `<head>` atau script memakai `@push('head')` / `@push('scripts')`. Menu sidebar diubah di `layouts/partials/workspace-sidebar.blade.php`; jumlah approval disuntikkan ke partial itu oleh view composer di `AppServiceProvider`.
 
 ## Palet wajib
 
@@ -39,7 +54,7 @@ Gunakan `bg-primary`, `text-primaryDark`, `bg-surface`, `border-secondaryLight`,
 - Ukuran informasi utama, input, dan tombol 16px (`text-base`); keterangan pendukung, label ringkas, dan badge minimal 14px (`text-sm`). Hindari `text-xs` atau ukuran 9–13px untuk informasi. Beri line-height yang cukup dan periksa ulang pembungkusan teks pada mobile.
 - Header + konten memakai wrapper flex `min-h-screen` dengan main `flex-1`; footer bersama berada setelah wrapper agar tampil setelah scroll, termasuk pada halaman pendek (DEC-037). Jangan memakai posisi fixed. Container tabel `workspace-table` memakai `relative` agar teks sr-only tidak menambah lebar halaman pada mobile.
 - Font mengikuti `font-sans` existing (Segoe UI, Arial, sans-serif); jangan menambah font CDN.
-- Gunakan header surface dan latar background. Sidebar primaryDark berlaku untuk PIC/admin; role user memakai navbar `layouts.user` sesuai DEC-024. Referensi admin/jadwal adalah gaya visual, sedangkan susunan konten mengikuti tugas role: approval untuk PIC, pencarian dan booking pribadi untuk user. Halaman mempunyai satu h1, deskripsi singkat, serta aksi utama yang relevan dengan role.
+- Gunakan header surface dan latar background. Sidebar primaryDark berlaku untuk PIC/admin; role user memakai navbar `layouts.employee` (partial `layouts/partials/employee-navbar.blade.php`) sesuai DEC-024. Referensi admin/jadwal adalah gaya visual, sedangkan susunan konten mengikuti tugas role: approval untuk PIC, pencarian dan booking pribadi untuk user. Halaman mempunyai satu h1, deskripsi singkat, serta aksi utama yang relevan dengan role.
 - Ikuti skala referensi: konten `p-5 lg:p-9`, jarak `gap-4`/`gap-6`, card `rounded-2xl`, tombol `rounded-lg`/`rounded-xl`, border halus dan `shadow-sm` secukupnya.
 - Gunakan komponen/partial untuk form, tabel, badge, dan detail yang berulang. Periksa pemakai komponen sebelum mengubahnya agar halaman lain tetap berfungsi.
 - Pada desktop, navigasi pegawai sejajar di kanan logo dan PIC/admin memakai sidebar. Di bawah breakpoint lg, navigasi ketiga role dibuka/tutup melalui hamburger dengan JavaScript existing; Escape menutup menu dan mengembalikan fokus ke tombol. Form menyesuaikan lebar layar; tabel/kalender lebar boleh scroll di dalam container, bukan membuat seluruh halaman melebar.

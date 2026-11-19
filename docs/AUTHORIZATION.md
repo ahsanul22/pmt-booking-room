@@ -60,7 +60,21 @@ Koreksi 2026-10-19 menggantikan asumsi filter-only DEC-051 di atas. Admin mengel
 
 Batas berlaku di query dan service, bukan hanya Blade: katalog, jadwal/polling, detail dan URL booking, submit/retry, riwayat pribadi, badge/dashboard PIC, approval, laporan/CSV/print dan penerima notifikasi. PIC membutuhkan izin lokasi sekaligus assignment room. Penambahan assignment tidak otomatis memberi izin. Pencabutan izin langsung efektif pada request/refresh berikutnya; data booking tidak dihapus.
 
-## Izin resepsionis (DEC-058)
+## Role Admin cabang dan Super Admin (DEC-061, 2026-11-19)
+
+| Gate | Role |
+| --- | --- |
+| `access-general` | User, Room PIC, Admin, Super Admin |
+| `access-employee` | User, Room PIC |
+| `access-pic` | Room PIC, Admin, Super Admin |
+| `access-admin` | Admin, Super Admin |
+| `access-super-admin` | Super Admin |
+
+Admin cabang memakai area `/admin` tetapi data dibatasi ke satu lokasi pada pivot branch_user. Gate `manage-room` memeriksa lokasi ruangan; `manage-user` hanya mengizinkan akun User/Room PIC di lokasi Admin. Route Kantor & Cabang, Lantai, Fasilitas, Unit Organisasi, dan Notifikasi berada di grup `can:access-super-admin`. Dropdown/filter lokasi hanya untuk Super Admin.
+
+## Izin resepsionis (DEC-058, dihapus oleh DEC-062)
+
+Bagian ini historis; checkbox dan kolom is_receptionist sudah dihapus.
 
 users.is_receptionist merupakan izin tambahan, bukan role. Admin mengaturnya melalui SaveUserRequest/kelola akun. User/PIC aktif yang ditunjuk dapat memilih tamu aktif di kantor ruangan saat booking, tetap dibatasi izin lokasi/unit/ruangan. Akun Admin tidak mendapat hak booking dari flag ini. Flag tidak mass assignable. BookingService memeriksa user yang dikunci ulang sebelum pemrosesan referensi/idempotensi tamu; Livewire tidak memberikan daftar tamu kepada akun biasa atau setelah izin dicabut. Persetujuan booking tetap kewenangan PIC/Admin existing.
 
