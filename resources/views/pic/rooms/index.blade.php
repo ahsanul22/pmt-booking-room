@@ -1,4 +1,4 @@
-@extends('layouts.schedule')
+@extends('layouts.workspace')
 @section('title', 'Ruangan Saya')
 @section('breadcrumb', 'Ruangan Saya')
 @section('content')

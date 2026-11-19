@@ -1,4 +1,4 @@
-@extends('layouts.schedule')
+@extends('layouts.workspace')
 
 @section('title', $history ? 'Riwayat Approval' : 'Permintaan Approval')
 @section('breadcrumb', $history ? 'Riwayat Approval' : 'Permintaan Approval')

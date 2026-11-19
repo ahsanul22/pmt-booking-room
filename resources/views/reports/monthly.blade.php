@@ -1,4 +1,4 @@
-@extends($printing ? 'layouts.report' : 'layouts.schedule')
+@extends($printing ? 'layouts.report' : 'layouts.workspace')
 @section('title', 'Laporan Bulanan')
 @section('breadcrumb', 'Laporan Bulanan')
 @section('content')

@@ -20,8 +20,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         view()->composer([
-            'layouts.schedule',
-            'layouts.navigation',
+            'layouts.partials.workspace-sidebar',
             'pic.rooms.index',
             'shared.dashboard-shortcuts',
         ], function ($view) {

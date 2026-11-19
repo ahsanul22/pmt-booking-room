@@ -1,4 +1,4 @@
-@extends(auth()->user()?->can('access-general') ? (auth()->user()->role === \App\Models\User::ROLE_USER ? 'layouts.user' : 'layouts.schedule') : 'layouts.public')
+@extends('layouts.panel')
 @section('title', 'Halaman Tidak Ditemukan')
 @section('breadcrumb', 'Halaman Tidak Ditemukan')
 @section('content')

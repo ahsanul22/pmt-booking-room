@@ -1,4 +1,4 @@
-@extends('layouts.schedule')
+@extends('layouts.workspace')
 
 @section('title', 'Detail Approval')
 @section('breadcrumb', 'Approval / Detail')

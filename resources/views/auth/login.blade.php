@@ -1,12 +1,9 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Portal Pemesanan Ruang Rapat · Pelindo Multi Terminal</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="relative min-h-screen bg-gradient-to-br from-[#d4e9f7] via-[#ebf4fa] to-[#bfe1f7] font-sans text-text antialiased overflow-x-hidden selection:bg-primary selection:text-white">
+@extends('layouts.app')
+
+@section('document-title', 'Portal Pemesanan Ruang Rapat · Pelindo Multi Terminal')
+@section('body-class', 'relative min-h-screen bg-gradient-to-br from-[#d4e9f7] via-[#ebf4fa] to-[#bfe1f7] font-sans text-text antialiased overflow-x-hidden selection:bg-primary selection:text-white')
+
+@section('body')
     <a href="#login-form" class="sr-only focus:not-sr-only focus:fixed focus:z-50 focus:rounded-lg focus:bg-surface focus:p-4 focus:shadow-lg">Langsung ke form login</a>
 
     <!-- Decorative background organic shapes (matching reference mockup) -->
@@ -227,6 +224,4 @@
             }
         }
     </script>
-    @include('shared.page-loading')
-</body>
-</html>
+@endsection

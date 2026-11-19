@@ -1,4 +1,4 @@
-@extends('layouts.schedule')
+@extends('layouts.workspace')
 @section('title', 'Detail Booking')
 @section('breadcrumb', 'Semua Booking / Detail')
 @section('content')

@@ -1,4 +1,4 @@
-@extends(auth()->user()->role === \App\Models\User::ROLE_USER ? 'layouts.user' : 'layouts.schedule')
+@extends('layouts.panel')
 @section('title', 'Detail Booking')
 @section('breadcrumb', 'My Booking / Detail')
 @section('content')
