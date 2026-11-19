@@ -9,7 +9,7 @@ class SaveFloorRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('access-admin');
+        return $this->user()->can('access-super-admin');
     }
 
     public function rules(): array

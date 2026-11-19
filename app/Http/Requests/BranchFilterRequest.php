@@ -6,7 +6,7 @@ class BranchFilterRequest extends PaginationRequest
 {
     public function authorize(): bool
     {
-        return parent::authorize() && (! $this->filled('branch_id') || $this->user()->can('access-admin'));
+        return parent::authorize() && (! $this->filled('branch_id') || $this->user()->can('access-super-admin'));
     }
 
     public function rules(): array

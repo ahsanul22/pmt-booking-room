@@ -6,7 +6,7 @@
     $picked = is_array($picked) ? array_map('strval', array_filter($picked, fn ($id) => is_scalar($id))) : [];
     $bodyInput = $hasOld ? old('body') : $template->body;
     $bodyInput = is_string($bodyInput) ? $bodyInput : '';
-    $options = $users->filter(fn ($user) => ! $approval || $user->role === \App\Models\User::ROLE_SUPER_ADMIN);
+    $options = $users->filter(fn ($user) => ! $approval || $user->isAdministrator());
     $eligible = $options->filter(fn ($user) => $user->is_active && \App\Support\WhatsappNumber::valid($user->whatsapp_number));
     $unavailable = $options->diff($eligible);
     $savedRecipients = $eligible->whereIn('id', $savedIds)->count();
@@ -40,11 +40,11 @@
                     @endif
                 @endif
                 <fieldset class="min-w-0" aria-describedby="recipients-{{ $template->id }}-hint{{ $hasOld && $errors->has('recipient_ids') ? ' recipients-'.$template->id.'-error' : '' }}">
-                    <legend class="font-semibold text-primaryDark">{{ $approval ? 'Admin tambahan (opsional)' : 'Petugas konsumsi' }}</legend>
-                    <p id="recipients-{{ $template->id }}-hint" class="mt-1 text-sm text-slate-600">{{ $approval ? 'Pilih jika Admin juga perlu menerima pesan.' : 'Pilih akun yang bertugas menerima kebutuhan konsumsi.' }}</p>
+                    <legend class="font-semibold text-primaryDark">{{ $approval ? 'Admin / Super Admin tambahan (opsional)' : 'Petugas konsumsi' }}</legend>
+                    <p id="recipients-{{ $template->id }}-hint" class="mt-1 text-sm text-slate-600">{{ $approval ? 'Pilih jika Admin atau Super Admin juga perlu menerima pesan. Admin hanya menerima pengajuan dari kantor/cabangnya.' : 'Pilih akun yang bertugas menerima kebutuhan konsumsi.' }}</p>
                     <div class="mt-3 max-h-48 space-y-2 overflow-y-auto">
                         @forelse($eligible as $user)
-                            <label class="flex min-h-[44px] cursor-pointer items-center gap-3 rounded-xl border border-slate-200 p-3 has-[:checked]:border-primary has-[:checked]:bg-secondaryLight/20"><input class="h-5 w-5 shrink-0 rounded border-slate-300 text-primary focus:ring-primary" type="checkbox" name="recipient_ids[]" value="{{ $user->id }}" @checked(in_array((string) $user->id, $picked, true))><span class="min-w-0 break-words"><span class="block font-medium">{{ $user->name }}</span><span class="text-sm text-slate-600">{{ $user->whatsapp_number }}</span></span></label>
+                            <label class="flex min-h-[44px] cursor-pointer items-center gap-3 rounded-xl border border-slate-200 p-3 has-[:checked]:border-primary has-[:checked]:bg-secondaryLight/20"><input class="h-5 w-5 shrink-0 rounded border-slate-300 text-primary focus:ring-primary" type="checkbox" name="recipient_ids[]" value="{{ $user->id }}" @checked(in_array((string) $user->id, $picked, true))><span class="min-w-0 break-words"><span class="block font-medium">{{ $user->name }}</span><span class="text-sm text-slate-600">{{ $user->roleLabel() }} · {{ $user->whatsapp_number }}</span></span></label>
                         @empty
                             <div class="rounded-xl bg-background p-4"><p class="text-sm text-slate-600">Belum ada {{ $approval ? 'Admin' : 'akun' }} dengan nomor WhatsApp siap digunakan.</p></div>
                         @endforelse

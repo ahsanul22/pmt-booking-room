@@ -11,7 +11,7 @@ class DashboardController extends Controller
 {
     public function index(Request $request): View
     {
-        return view('admin.dashboard', app(AdminDashboard::class)->data() + [
+        return view('admin.dashboard', app(AdminDashboard::class)->data($request->user()) + [
             'user' => $request->user()->load('organizationalUnit'),
             'title' => 'Dashboard Admin',
         ]);

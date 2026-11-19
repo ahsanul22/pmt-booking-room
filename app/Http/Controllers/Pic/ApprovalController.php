@@ -33,7 +33,7 @@ class ApprovalController extends Controller
         $approvals = $this->query($request)->where('status', 'pending')->orderBy('date')->orderBy('start_time')->paginate(self::PAGE_SIZE)->withQueryString();
         $history = false;
 
-        return view('pic.approvals.index', compact('approvals', 'history') + ['branches' => ($request->user()->can('access-admin') ? Branch::orderBy('name')->get() : collect()), 'approvalRoutePrefix' => $this->routePrefix($request)]);
+        return view('pic.approvals.index', compact('approvals', 'history') + ['branches' => ($request->user()->can('access-super-admin') ? Branch::orderBy('name')->get() : collect()), 'approvalRoutePrefix' => $this->routePrefix($request)]);
     }
 
     public function history(BranchFilterRequest $request): View
@@ -41,7 +41,7 @@ class ApprovalController extends Controller
         $approvals = $this->query($request)->whereIn('status', ['approved', 'rejected'])->latest('decided_at')->paginate(self::PAGE_SIZE)->withQueryString();
         $history = true;
 
-        return view('pic.approvals.index', compact('approvals', 'history') + ['branches' => ($request->user()->can('access-admin') ? Branch::orderBy('name')->get() : collect()), 'approvalRoutePrefix' => $this->routePrefix($request)]);
+        return view('pic.approvals.index', compact('approvals', 'history') + ['branches' => ($request->user()->can('access-super-admin') ? Branch::orderBy('name')->get() : collect()), 'approvalRoutePrefix' => $this->routePrefix($request)]);
     }
 
     public function show(BranchFilterRequest $request, int $approval): View
@@ -49,7 +49,7 @@ class ApprovalController extends Controller
         $booking = $this->query($request)->findOrFail($approval);
         $canDecide = $booking->status === 'pending';
 
-        return view('pic.approvals.show', compact('booking', 'canDecide') + ['branches' => ($request->user()->can('access-admin') ? Branch::orderBy('name')->get() : collect()), 'approvalRoutePrefix' => $this->routePrefix($request)]);
+        return view('pic.approvals.show', compact('booking', 'canDecide') + ['branches' => ($request->user()->can('access-super-admin') ? Branch::orderBy('name')->get() : collect()), 'approvalRoutePrefix' => $this->routePrefix($request)]);
     }
 
     public function decide(DecideBookingRequest $request, int $approval, BookingService $service): RedirectResponse

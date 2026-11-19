@@ -19,11 +19,11 @@ class Room extends Model
 
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
-        if (! $user->is_active || ! in_array($user->role, [User::ROLE_SUPER_ADMIN, User::ROLE_ROOM_PIC, User::ROLE_USER], true)) {
+        if (! $user->is_active || ! in_array($user->role, User::ROLES, true)) {
             return $query->whereRaw('1 = 0');
         }
 
-        return $query->when($user->role !== User::ROLE_SUPER_ADMIN, fn ($rooms) => $rooms
+        return $query->when(! $user->isSuperAdmin(), fn ($rooms) => $rooms
             ->whereIn('rooms.branch_id', $user->branches()->select('branches.id')));
     }
 

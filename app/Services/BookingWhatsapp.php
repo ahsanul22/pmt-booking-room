@@ -29,7 +29,7 @@ class BookingWhatsapp
     {
         $selected = User::where('is_active', true)->whereHas('notificationRecipients', fn ($query) => $query
             ->where('purpose', $event)->where('is_active', true))
-            ->when($event === 'approval_request', fn ($query) => $query->where('role', User::ROLE_SUPER_ADMIN))->get();
+            ->when($event === 'approval_request', fn ($query) => $query->whereIn('role', [User::ROLE_ADMIN, User::ROLE_SUPER_ADMIN]))->get();
         if ($event === 'approval_request' && $template->include_room_pics) {
             $selected = $selected->merge($booking->room->pics()->where('role', User::ROLE_ROOM_PIC)->where('is_active', true)->get());
         }
@@ -46,7 +46,7 @@ class BookingWhatsapp
             'agenda' => $booking->agenda, 'date' => $booking->date,
             'start_time' => substr($booking->start_time, 0, 5), 'end_time' => substr($booking->end_time, 0, 5),
             'participant_count' => (string) ($booking->participant_count ?? '-'),
-            'review_url' => route($recipient?->role === User::ROLE_SUPER_ADMIN ? 'admin.approvals.show' : 'pic.approvals.show', $booking->id),
+            'review_url' => route($recipient?->isAdministrator() ? 'admin.approvals.show' : 'pic.approvals.show', $booking->id),
         ];
 
         return strtr($body, collect($values)->mapWithKeys(fn ($value, $key) => ['{'.$key.'}' => $value])->all());

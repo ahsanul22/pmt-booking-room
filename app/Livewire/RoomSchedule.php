@@ -42,7 +42,7 @@ class RoomSchedule extends Component
 
     public function selectBranch(string $id): void
     {
-        Gate::authorize('access-admin');
+        Gate::authorize('access-super-admin');
         abort_unless($id === '' || (filter_var($id, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) !== false && Branch::whereKey($id)->exists()), 422);
         $this->branchId = $id === '' ? null : (int) $id;
         $this->draftBranch = $id;
@@ -68,7 +68,7 @@ class RoomSchedule extends Component
     public function mount(): void
     {
         $branch = request()->query('branch_id');
-        if (auth()->user()->can('access-admin') && is_string($branch) && filter_var($branch, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) !== false && Branch::whereKey($branch)->exists()) {
+        if (auth()->user()->can('access-super-admin') && is_string($branch) && filter_var($branch, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) !== false && Branch::whereKey($branch)->exists()) {
             $this->branchId = (int) $branch;
         }
         $date = request()->query('date');
@@ -133,7 +133,7 @@ class RoomSchedule extends Component
             'days' => $days, 'monthLabel' => $month->locale('id')->translatedFormat('F Y'),
             'dayLabel' => CarbonImmutable::parse($this->selectedDate)->locale('id')->translatedFormat('l, d F Y'),
             'daySlots' => $slots->where('date', $this->selectedDate)->values(),
-            'branches' => auth()->user()->can('access-admin') ? Branch::orderBy('name')->get() : collect(),
+            'branches' => auth()->user()->can('access-super-admin') ? Branch::orderBy('name')->get() : collect(),
             'rooms' => $this->roomsQuery()->with('branch')->orderBy('name')->get(['id', 'name', 'is_active', 'status', 'branch_id']),
             'updatedAt' => $now->format('H:i:s'),
         ]);

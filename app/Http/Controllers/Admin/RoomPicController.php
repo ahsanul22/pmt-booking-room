@@ -13,11 +13,15 @@ class RoomPicController extends Controller
 {
     public function edit(Room $room): RedirectResponse
     {
+        $this->authorize('manage-room', $room);
+
         return redirect()->to(route('admin.rooms.show', $room).'#pics');
     }
 
     public function update(SaveRoomPicsRequest $request, Room $room, RoomAssignmentService $service): RedirectResponse
     {
+        $this->authorize('manage-room', $room);
+
         $service->syncPics($room, $request->validated('pic_ids'));
 
         return redirect()->route('admin.rooms.show', $room)->with('status', 'PIC ruangan berhasil diperbarui.');
@@ -25,6 +29,8 @@ class RoomPicController extends Controller
 
     public function destroy(Room $room, User $pic, RoomAssignmentService $service): RedirectResponse
     {
+        $this->authorize('manage-room', $room);
+
         $service->removePic($room, $pic);
 
         return redirect()->route('admin.rooms.show', $room)->with('status', 'PIC berhasil dilepas dari ruangan.');

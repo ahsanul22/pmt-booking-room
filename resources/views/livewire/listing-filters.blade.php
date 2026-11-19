@@ -4,7 +4,7 @@
             <option value="">Semua jenis</option><option value="approval_request">Pengajuan approval</option><option value="consumption">Konsumsi</option>
         </x-workspace-field>
     @else
-        @can('access-admin')
+        @can('access-super-admin')
             <x-workspace-field type="select" name="branch" label="Kantor / Cabang" wire:model.live="branch">
                 <option value="">Semua lokasi</option>
                 @foreach($branches as $location)<option value="{{ $location->id }}">{{ $location->name }}</option>@endforeach

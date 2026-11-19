@@ -19,7 +19,7 @@ class WhatsappSettings
             $users = User::whereKey($data['recipient_ids'] ?? [])->sharedLock()->get();
             foreach ($users as $user) {
                 if (! $user->is_active || ! WhatsappNumber::valid($user->whatsapp_number)
-                    || ($template->event === 'approval_request' && $user->role !== User::ROLE_SUPER_ADMIN)) {
+                    || ($template->event === 'approval_request' && ! $user->isAdministrator())) {
                     throw ValidationException::withMessages(['recipient_ids' => 'Akun penerima berubah. Muat ulang dan pilih penerima aktif dengan nomor valid.']);
                 }
             }

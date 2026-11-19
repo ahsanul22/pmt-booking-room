@@ -33,7 +33,7 @@ class RoomCatalog extends Component
 
     public function selectBranch(string $id): void
     {
-        Gate::authorize('access-admin');
+        Gate::authorize('access-super-admin');
         abort_unless($id === '' || (filter_var($id, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) !== false && Branch::whereKey($id)->exists()), 422);
         $this->branchId = $id === '' ? null : (int) $id;
         $this->draftBranch = $id;
@@ -73,7 +73,7 @@ class RoomCatalog extends Component
 
         return view('livewire.room-catalog', [
             'reasons' => $reasons,
-            'branches' => auth()->user()->can('access-admin') ? Branch::orderBy('name')->get() : collect(),
+            'branches' => auth()->user()->can('access-super-admin') ? Branch::orderBy('name')->get() : collect(),
             'rooms' => $rooms,
             'filters' => ['all' => 'Semua Ruangan', 'featured' => $featuredName, 'other' => 'Ruang Rapat Lainnya'],
         ]);

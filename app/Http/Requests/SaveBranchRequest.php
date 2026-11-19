@@ -9,7 +9,7 @@ class SaveBranchRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('access-admin') ?? false;
+        return $this->user()?->can('access-super-admin') ?? false;
     }
 
     public function rules(): array

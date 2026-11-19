@@ -102,12 +102,10 @@ class ControllerValidationTest extends PostgresTestCase
         $this->assertTrue($guest->expires_at->lessThan(now()->addWeek()));
         $this->getJson('/tamu/jadwal?date=0000-01-01')->assertUnprocessable()->assertJsonValidationErrors('date');
         $user = User::where('role', User::ROLE_USER)->firstOrFail();
-        User::whereKey($user->id)->update(['is_receptionist' => true]);
         $updated = app(UserService::class)->save($user, [
             'name' => $user->name, 'email' => $user->email, 'role' => $user->role,
             'is_active' => true, 'organizational_unit_id' => $user->organizational_unit_id,
         ]);
-        $this->assertTrue($updated->is_receptionist);
         $this->assertTrue($updated->branches()->exists());
         $this->assertSame($user->password, $updated->password);
     }

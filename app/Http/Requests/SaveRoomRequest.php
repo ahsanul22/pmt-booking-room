@@ -18,6 +18,10 @@ class SaveRoomRequest extends FormRequest
         if (! $this->exists('facility_ids')) {
             $this->merge(['facility_ids' => []]);
         }
+        // Without a location, a new room would fall back to the database default (Kantor Pusat).
+        if (! $this->route('room') && ! $this->exists('branch_id') && ! $this->user()->isSuperAdmin()) {
+            $this->merge(['branch_id' => $this->user()->managedBranchId()]);
+        }
     }
 
     public function rules(): array
@@ -25,7 +29,12 @@ class SaveRoomRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'code' => ['bail', 'nullable', 'string', 'max:255', Rule::unique('rooms')->ignore($this->route('room'))],
-            'branch_id' => ['bail', 'sometimes', 'required', 'integer', 'exists:branches,id'],
+            'branch_id' => ['bail', 'sometimes', 'required', 'integer', 'exists:branches,id', function ($attribute, $value, $fail) {
+                // Branch Admin may only place rooms in its own location (DEC-061).
+                if (! $this->user()->canAccessBranch((int) $value)) {
+                    $fail('Anda hanya dapat mengelola ruangan pada lokasi Anda.');
+                }
+            }],
             'floor_id' => ['bail', 'required', 'integer', 'exists:floors,id'],
             'capacity' => ['sometimes', 'integer', 'between:0,2147483647'],
             'description' => ['nullable', 'string', 'max:5000'],

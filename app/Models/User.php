@@ -20,22 +20,59 @@ class User extends Authenticatable
 
     public const ROLE_ROOM_PIC = 'room_pic';
 
+    /** Branch Admin: manages exactly one office/branch (DEC-061). */
+    public const ROLE_ADMIN = 'admin';
+
+    /** Central Admin across every office/branch. */
     public const ROLE_SUPER_ADMIN = 'super_admin';
 
-    public function canHandleGuests(): bool
+    public const ROLES = [self::ROLE_USER, self::ROLE_ROOM_PIC, self::ROLE_ADMIN, self::ROLE_SUPER_ADMIN];
+
+    public function isSuperAdmin(): bool
     {
-        return $this->is_active && $this->is_receptionist
-            && in_array($this->role, [self::ROLE_USER, self::ROLE_ROOM_PIC], true);
+        return $this->role === self::ROLE_SUPER_ADMIN;
+    }
+
+    /** Admin or Super Admin, by role only (no active-status check). */
+    public function isAdministrator(): bool
+    {
+        return in_array($this->role, [self::ROLE_ADMIN, self::ROLE_SUPER_ADMIN], true);
+    }
+
+    /** Roles this account may assign when creating or editing users. */
+    public function assignableRoles(): array
+    {
+        return match ($this->role) {
+            self::ROLE_SUPER_ADMIN => self::ROLES,
+            self::ROLE_ADMIN => [self::ROLE_USER, self::ROLE_ROOM_PIC],
+            default => [],
+        };
+    }
+
+    /** The single branch managed by a Branch Admin. */
+    public function managedBranchId(): ?int
+    {
+        if ($this->role !== self::ROLE_ADMIN) {
+            return null;
+        }
+        $id = $this->branches()->orderBy('branches.id')->value('branches.id');
+
+        return $id === null ? null : (int) $id;
+    }
+
+    public static function roleOptions(): array
+    {
+        return [
+            self::ROLE_USER => 'User',
+            self::ROLE_ROOM_PIC => 'Room PIC',
+            self::ROLE_ADMIN => 'Admin',
+            self::ROLE_SUPER_ADMIN => 'Super Admin',
+        ];
     }
 
     public function roleLabel(): string
     {
-        return match ($this->role) {
-            self::ROLE_USER => 'User',
-            self::ROLE_ROOM_PIC => 'Room PIC',
-            self::ROLE_SUPER_ADMIN => 'Admin',
-            default => ucfirst(str_replace('_', ' ', $this->role)),
-        };
+        return self::roleOptions()[$this->role] ?? ucfirst(str_replace('_', ' ', $this->role));
     }
 
     public function dashboardRouteName(): string
@@ -43,7 +80,7 @@ class User extends Authenticatable
         return match ($this->role) {
             self::ROLE_USER => 'dashboard',
             self::ROLE_ROOM_PIC => 'pic.dashboard',
-            self::ROLE_SUPER_ADMIN => 'admin.dashboard',
+            self::ROLE_ADMIN, self::ROLE_SUPER_ADMIN => 'admin.dashboard',
             default => throw new AuthorizationException,
         };
     }
@@ -66,7 +103,7 @@ class User extends Authenticatable
     public function canAccessBranch(int $branchId): bool
     {
         return $this->is_active && ($this->role === self::ROLE_SUPER_ADMIN
-            || (in_array($this->role, [self::ROLE_USER, self::ROLE_ROOM_PIC], true)
+            || (in_array($this->role, [self::ROLE_USER, self::ROLE_ROOM_PIC, self::ROLE_ADMIN], true)
                 && $this->branches()->whereKey($branchId)->exists()));
     }
 
@@ -117,7 +154,6 @@ class User extends Authenticatable
      * @var array<string, string>
      */
     protected $casts = [
-        'is_receptionist' => 'boolean',
         'email_verified_at' => 'datetime',
         'is_active' => 'boolean',
     ];

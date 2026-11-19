@@ -51,7 +51,12 @@ class ListingFilters extends Component
             default => [],
         };
         abort_unless(in_array($this->destination, $allowed, true), 403);
-        Gate::authorize($this->kind !== 'report' || str_starts_with($this->destination, 'admin.') ? 'access-admin' : 'access-pic');
+        Gate::authorize(match (true) {
+            // Only Super Admin chooses between locations or manages notifications (DEC-061).
+            $this->kind !== 'report' => 'access-super-admin',
+            str_starts_with($this->destination, 'admin.') => 'access-admin',
+            default => 'access-pic',
+        });
     }
 
     public function updatedBranch(): void
@@ -63,7 +68,7 @@ class ListingFilters extends Component
     {
         $this->authorizeDestination();
         $this->validate([
-            'branch' => ['bail', Rule::prohibitedIf(! auth()->user()->can('access-admin')), 'nullable', 'integer', 'min:1', 'exists:branches,id'],
+            'branch' => ['bail', Rule::prohibitedIf(! auth()->user()->can('access-super-admin')), 'nullable', 'integer', 'min:1', 'exists:branches,id'],
             'room' => ['nullable', 'integer', 'min:1'],
             'month' => [Rule::requiredIf($this->kind === 'report'), 'nullable', 'date_format:Y-m', 'after_or_equal:1000-01', 'before_or_equal:9998-12'],
             'event' => ['nullable', Rule::in(['approval_request', 'consumption'])],
@@ -90,7 +95,7 @@ class ListingFilters extends Component
         $validBranch = $this->branch === '' || filter_var($this->branch, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) !== false;
 
         return view('livewire.listing-filters', [
-            'branches' => auth()->user()->can('access-admin') ? Branch::orderBy('name')->get() : collect(),
+            'branches' => auth()->user()->can('access-super-admin') ? Branch::orderBy('name')->get() : collect(),
             'rooms' => $this->kind === 'report' && $validBranch ? app(MonthlyBookingReport::class)->rooms(auth()->user())
                 ->when($this->branch !== '', fn ($query) => $query->where('branch_id', $this->branch))
                 ->with('branch')->orderBy('name')->get() : collect(),

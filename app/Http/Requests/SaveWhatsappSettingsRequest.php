@@ -18,7 +18,7 @@ class SaveWhatsappSettingsRequest extends FormRequest
 
     public function authorize(): bool
     {
-        return $this->user()->can('access-admin');
+        return $this->user()->can('access-super-admin');
     }
 
     public function rules(): array
@@ -49,8 +49,8 @@ class SaveWhatsappSettingsRequest extends FormRequest
             $ids = $this->input('recipient_ids', []);
             $users = User::whereKey($ids)->get();
             foreach ($users as $user) {
-                if (! WhatsappNumber::valid($user->whatsapp_number) || ($event === 'approval_request' && $user->role !== User::ROLE_SUPER_ADMIN)) {
-                    $validator->errors()->add('recipient_ids', 'Penerima harus aktif dengan nomor WhatsApp valid. Penerima tambahan approval harus Admin.');
+                if (! WhatsappNumber::valid($user->whatsapp_number) || ($event === 'approval_request' && ! $user->isAdministrator())) {
+                    $validator->errors()->add('recipient_ids', 'Penerima harus aktif dengan nomor WhatsApp valid. Penerima tambahan approval harus Admin atau Super Admin.');
                     break;
                 }
             }

@@ -15,6 +15,7 @@ use App\Models\Room;
 use App\Models\User;
 use App\Services\RoomService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class RoomController extends Controller
@@ -22,14 +23,14 @@ class RoomController extends Controller
     public function index(BranchFilterRequest $request): View
     {
         return view('admin.rooms.index', [
-            'branches' => Branch::orderBy('name')->get(),
-            'rooms' => Room::with(['branch', 'floor', 'facilities'])->when($request->filled('branch_id'), fn ($query) => $query->where('branch_id', $request->integer('branch_id')))->orderBy('name')->orderBy('id')->paginate(20)->withQueryString(),
+            'branches' => $this->branches($request),
+            'rooms' => Room::query()->visibleTo($request->user())->with(['branch', 'floor', 'facilities'])->when($request->filled('branch_id'), fn ($query) => $query->where('branch_id', $request->integer('branch_id')))->orderBy('name')->orderBy('id')->paginate(20)->withQueryString(),
         ]);
     }
 
-    public function create(): View
+    public function create(Request $request): View
     {
-        return view('admin.rooms.create', $this->formOptions());
+        return view('admin.rooms.create', $this->formOptions($request));
     }
 
     public function store(SaveRoomRequest $request, RoomService $service): RedirectResponse
@@ -39,14 +40,16 @@ class RoomController extends Controller
         return redirect()->route('admin.rooms.show', $room)->with('status', 'Ruangan berhasil ditambahkan.');
     }
 
-    public function show(Room $room): View
+    public function show(Request $request, Room $room): View
     {
-        return $this->edit($room);
+        return $this->edit($request, $room);
     }
 
-    public function edit(Room $room): View
+    public function edit(Request $request, Room $room): View
     {
-        return view('admin.rooms.edit', $this->formOptions() + [
+        $this->authorize('manage-room', $room);
+
+        return view('admin.rooms.edit', $this->formOptions($request) + [
             'room' => $room->load(['floor', 'facilities', 'pics', 'allowedOrganizationalUnits']),
             'eligiblePics' => User::where('role', User::ROLE_ROOM_PIC)->whereHas('branches', fn ($query) => $query->where('branches.id', $room->branch_id))->orderBy('name')->get(),
             'units' => OrganizationalUnit::orderBy('name')->get(),
@@ -58,6 +61,7 @@ class RoomController extends Controller
 
     public function update(SaveRoomRequest $request, Room $room, RoomService $service): RedirectResponse
     {
+        $this->authorize('manage-room', $room);
         $room = $service->save($request->validated(), $room);
 
         return redirect()->route('admin.rooms.show', $room)->with('status', 'Ruangan berhasil diperbarui.');
@@ -65,6 +69,7 @@ class RoomController extends Controller
 
     public function status(UpdateStatusRequest $request, Room $room): RedirectResponse
     {
+        $this->authorize('manage-room', $room);
         $data = $request->validated();
         $room->update($data);
 
@@ -74,15 +79,23 @@ class RoomController extends Controller
 
     public function destroy(DeleteRoomRequest $request, Room $room, RoomService $service): RedirectResponse
     {
+        $this->authorize('manage-room', $room);
         $service->delete($room);
 
         return redirect()->route('admin.rooms.index')->with('status', 'Ruangan berhasil dihapus.');
     }
 
-    private function formOptions(): array
+    /** Super Admin sees every location; Branch Admin only its own (DEC-061). */
+    private function branches(Request $request)
+    {
+        return Branch::query()->when(! $request->user()->isSuperAdmin(), fn ($query) => $query
+            ->whereIn('id', $request->user()->branches()->select('branches.id')))->orderBy('name')->get();
+    }
+
+    private function formOptions(Request $request): array
     {
         return [
-            'branches' => Branch::orderBy('name')->get(),
+            'branches' => $this->branches($request),
             'floors' => Floor::orderBy('floor_number')->get(),
             'facilities' => Facility::orderBy('name')->get(),
         ];

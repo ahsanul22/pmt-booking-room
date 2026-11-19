@@ -12,11 +12,17 @@ class SaveUserRequest extends FormRequest
 {
     protected function prepareForValidation(): void
     {
-        if ($this->has('receptionist_selection_present') && ! $this->exists('is_receptionist')) {
-            $this->merge(['is_receptionist' => false]);
-        }
         if ($this->has('branch_selection_present') && ! $this->exists('branch_ids')) {
             $this->merge(['branch_ids' => []]);
+        }
+        // Branch Admin cannot choose locations: new accounts join its branch and
+        // existing permissions stay as Super Admin configured them (DEC-061).
+        if (! $this->user()->isSuperAdmin()) {
+            $input = $this->except(['branch_ids', 'branch_selection_present']);
+            if (! $this->route('user')) {
+                $input['branch_ids'] = array_filter([$this->user()->managedBranchId()]);
+            }
+            $this->replace($input);
         }
         if (is_string($this->input('email'))) {
             $this->merge(['email' => mb_strtolower(trim($this->input('email')))]);
@@ -28,7 +34,9 @@ class SaveUserRequest extends FormRequest
 
     public function authorize(): bool
     {
-        return $this->user()->can('access-admin');
+        $record = $this->route('user');
+
+        return $this->user()->can('access-admin') && (! $record || $this->user()->can('manage-user', $record));
     }
 
     public function rules(): array
@@ -43,21 +51,35 @@ class SaveUserRequest extends FormRequest
                 }
             }],
             'whatsapp_number' => ['bail', 'sometimes', 'nullable', 'string', 'regex:/^\+[1-9][0-9]{7,14}$/'],
-            'role' => ['required', Rule::in([User::ROLE_USER, User::ROLE_ROOM_PIC, User::ROLE_SUPER_ADMIN])],
+            'role' => ['required', Rule::in($this->user()->assignableRoles())],
             'organizational_unit_id' => ['bail', 'nullable', 'integer', 'exists:organizational_units,id'],
             'is_active' => ['required', 'boolean'],
-            'is_receptionist' => ['sometimes', 'boolean'],
             'branch_ids' => ['sometimes', 'array'],
             'branch_ids.*' => ['bail', 'required', 'integer', 'distinct', 'exists:branches,id'],
             'password' => [$record ? 'nullable' : 'required', 'string', 'confirmed', Password::min(8)],
         ];
     }
 
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            if ($validator->errors()->hasAny(['role', 'branch_ids', 'branch_ids.*']) || $this->input('role') !== User::ROLE_ADMIN) {
+                return;
+            }
+            // Without the field, an edit keeps the account's current locations.
+            $branches = $this->exists('branch_ids') ? (array) $this->input('branch_ids')
+                : ($this->route('user')?->branches()->pluck('branches.id')->all() ?? []);
+            if (count($branches) !== 1) {
+                $validator->errors()->add('branch_ids', 'Admin harus memiliki tepat satu kantor / cabang yang dikelola.');
+            }
+        });
+    }
+
     public function attributes(): array
     {
         return [
             'name' => 'nama', 'whatsapp_number' => 'nomor WhatsApp', 'organizational_unit_id' => 'unit kerja',
-            'is_active' => 'status aktif', 'is_receptionist' => 'izin resepsionis',
+            'is_active' => 'status aktif',
             'branch_ids' => 'izin lokasi', 'branch_ids.*' => 'lokasi',
         ];
     }

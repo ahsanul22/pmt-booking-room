@@ -17,7 +17,7 @@ class UserBookingController extends Controller
             ->whereIn('room_id', Room::query()->visibleTo($request->user())->select('rooms.id'))
             ->where('user_id', $request->user()->id)->when($request->filled('branch_id'), fn ($query) => $query->whereHas('room', fn ($rooms) => $rooms->where('branch_id', $request->integer('branch_id'))))->latest('id')->paginate(15)->withQueryString();
 
-        return view('user.bookings.index', compact('bookings') + ['branches' => ($request->user()->can('access-admin') ? Branch::orderBy('name')->get() : collect())]);
+        return view('user.bookings.index', compact('bookings') + ['branches' => ($request->user()->can('access-super-admin') ? Branch::orderBy('name')->get() : collect())]);
     }
 
     public function show(Request $request, Booking $booking): View

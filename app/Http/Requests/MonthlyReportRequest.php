@@ -15,7 +15,7 @@ class MonthlyReportRequest extends PaginationRequest
     {
         return parent::rules() + [
             'month' => ['bail', 'sometimes', 'required', 'date_format:Y-m', 'after_or_equal:1000-01', 'before_or_equal:9998-12'],
-            'branch_id' => ['bail', Rule::prohibitedIf(! $this->user()->can('access-admin')), 'nullable', 'integer', 'min:1', 'exists:branches,id'],
+            'branch_id' => ['bail', Rule::prohibitedIf(! $this->user()->can('access-super-admin')), 'nullable', 'integer', 'min:1', 'exists:branches,id'],
             'room_id' => ['bail', 'nullable', 'integer', 'min:1'],
         ];
     }

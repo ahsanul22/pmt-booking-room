@@ -31,8 +31,8 @@ class WhatsappRecipientCommand extends Command
         $id = $this->argument('user');
         $user = ctype_digit((string) $id) ? User::find($id) : null;
         if (! $user || ! $user->is_active || ! WhatsappNumber::valid($user->whatsapp_number)
-            || ($purpose === 'approval_request' && $user->role !== User::ROLE_SUPER_ADMIN)) {
-            $this->error('Pilih akun aktif dengan nomor valid (Admin untuk approval). Gunakan halaman /admin/whatsapp atau sertakan ID user.');
+            || ($purpose === 'approval_request' && ! $user->isAdministrator())) {
+            $this->error('Pilih akun aktif dengan nomor valid (Admin atau Super Admin untuk approval). Gunakan halaman /admin/whatsapp atau sertakan ID user.');
 
             return self::FAILURE;
         }

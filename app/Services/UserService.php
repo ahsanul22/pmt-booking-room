@@ -21,8 +21,6 @@ class UserService
             $user->role = $data['role'];
             $user->organizational_unit_id = $data['organizational_unit_id'] ?? null;
             $user->is_active = $data['is_active'];
-            $user->is_receptionist = in_array($data['role'], [User::ROLE_USER, User::ROLE_ROOM_PIC], true)
-                && (bool) ($data['is_receptionist'] ?? $user->is_receptionist);
             if (array_key_exists('whatsapp_number', $data)) {
                 $user->whatsapp_number = $data['whatsapp_number'];
             }

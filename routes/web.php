@@ -61,11 +61,6 @@ Route::prefix('pic')->name('pic.')->middleware(['auth', 'can:access-pic'])->grou
 });
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'can:access-admin'])->group(function () {
-    Route::resource('branches', BranchController::class)->only(['index', 'store', 'update'])->whereNumber('branch');
-    Route::get('/whatsapp', [WhatsappController::class, 'index'])->name('whatsapp.index');
-    Route::put('/whatsapp/{template}', [WhatsappController::class, 'update'])->whereNumber('template')->name('whatsapp.update');
-    Route::post('/whatsapp/{template}/preview', [WhatsappController::class, 'preview'])->whereNumber('template')->name('whatsapp.preview');
-    Route::post('/whatsapp/messages/{message}/retry', [WhatsappController::class, 'retry'])->whereNumber('message')->name('whatsapp.retry');
     Route::get('/approvals', [ApprovalController::class, 'index'])->name('approvals.index');
     Route::get('/approvals/history', [ApprovalController::class, 'history'])->name('approvals.history');
     Route::get('/approvals/{approval}', [ApprovalController::class, 'show'])->whereNumber('approval')->name('approvals.show');
@@ -77,13 +72,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'can:access-admin'])
     Route::patch('/users/{user}/status', [UserController::class, 'status'])->whereNumber('user')->name('users.status');
     Route::patch('/users/{user}/password', [UserController::class, 'resetPassword'])->whereNumber('user')->name('users.reset-password');
     Route::resource('users', UserController::class)->whereNumber('user')->except('destroy');
-    Route::patch('/organizational-units/{unit}/status', [OrganizationalUnitController::class, 'status'])->name('organizational-units.status');
-    Route::resource('organizational-units', OrganizationalUnitController::class)
-        ->parameters(['organizational-units' => 'unit'])->except('destroy');
-    Route::patch('/floors/{floor}/status', [FloorController::class, 'status'])->name('floors.status');
-    Route::resource('floors', FloorController::class)->except('destroy');
-    Route::patch('/facilities/{facility}/status', [FacilityController::class, 'status'])->name('facilities.status');
-    Route::resource('facilities', FacilityController::class)->except('destroy');
     Route::patch('/rooms/{room}/status', [RoomController::class, 'status'])->name('rooms.status');
     Route::resource('rooms', RoomController::class);
     Route::get('/rooms/{room}/pics', [RoomPicController::class, 'edit'])->name('rooms.pics');
@@ -94,6 +82,22 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'can:access-admin'])
     Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
     Route::get('/bookings/{booking}', [BookingController::class, 'show'])->whereNumber('booking')->name('bookings.show');
     Route::get('/schedule', [ScheduleController::class, 'index'])->name('schedule.index');
+
+    // Global master data stays with Super Admin (DEC-061).
+    Route::middleware('can:access-super-admin')->group(function () {
+        Route::resource('branches', BranchController::class)->only(['index', 'store', 'update'])->whereNumber('branch');
+        Route::get('/whatsapp', [WhatsappController::class, 'index'])->name('whatsapp.index');
+        Route::put('/whatsapp/{template}', [WhatsappController::class, 'update'])->whereNumber('template')->name('whatsapp.update');
+        Route::post('/whatsapp/{template}/preview', [WhatsappController::class, 'preview'])->whereNumber('template')->name('whatsapp.preview');
+        Route::post('/whatsapp/messages/{message}/retry', [WhatsappController::class, 'retry'])->whereNumber('message')->name('whatsapp.retry');
+        Route::patch('/organizational-units/{unit}/status', [OrganizationalUnitController::class, 'status'])->name('organizational-units.status');
+        Route::resource('organizational-units', OrganizationalUnitController::class)
+            ->parameters(['organizational-units' => 'unit'])->except('destroy');
+        Route::patch('/floors/{floor}/status', [FloorController::class, 'status'])->name('floors.status');
+        Route::resource('floors', FloorController::class)->except('destroy');
+        Route::patch('/facilities/{facility}/status', [FacilityController::class, 'status'])->name('facilities.status');
+        Route::resource('facilities', FacilityController::class)->except('destroy');
+    });
 });
 
 require __DIR__.'/auth.php';
