@@ -25,4 +25,5 @@
             @yield('content')
         @endif
     </main>
+    @include('shared.footer')
 @endsection

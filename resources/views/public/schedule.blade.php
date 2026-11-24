@@ -22,7 +22,7 @@
         </div>
     </div>
     
-    <div class="rounded-2xl bg-white p-4 shadow-sm border border-slate-200/60 sm:p-6">
+    <div class="rounded-2xl bg-surface p-4 shadow-sm border border-slate-200/60 sm:p-6">
         <livewire:public-room-schedule />
     </div>
 </section>
