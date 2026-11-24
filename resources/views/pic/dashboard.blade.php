@@ -1,46 +1,40 @@
-@php
-    $stats = ! empty($stats) ? $stats : [
-        ['label' => 'Menunggu approval', 'icon' => 'clock', 'value' => 0, 'description' => 'Pengajuan perlu ditinjau'],
-        ['label' => 'Ruangan tanggung jawab', 'icon' => 'room', 'value' => 0, 'description' => 'Ruangan ditugaskan'],
-        ['label' => 'Jadwal hari ini', 'icon' => 'calendar', 'value' => 0, 'description' => 'Penggunaan hari ini'],
-    ];
-@endphp
-
-<div role="note" class="mb-6 flex items-start gap-3 rounded-xl border border-secondaryLight/70 bg-secondaryLight/20 px-4 py-3 text-sm leading-5 text-primaryDark">
-    <span class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary"></span>
-    <p><strong>Dashboard PIC</strong> · Buka Permintaan Approval untuk meninjau dan memutuskan pengajuan ruangan Anda.</p>
-</div>
+<x-dashboard-hero eyebrow="Workspace PIC Ruangan" :title="$title" description="Periksa pengajuan dan pastikan ketersediaan ruangan tanggung jawab Anda.">
+    <a href="{{ route('pic.approvals.index') }}" class="inline-flex min-h-[48px] items-center gap-2 rounded-xl bg-surface px-5 py-3 text-base font-semibold text-primaryDark transition hover:bg-secondaryLight focus-visible:outline-white">Permintaan Approval<x-schedule-icon name="arrow" class="h-4 w-4" /></a>
+    <a href="{{ route('pic.rooms.index') }}" class="inline-flex min-h-[48px] items-center gap-2 rounded-xl border border-white/40 px-5 py-3 text-base font-semibold text-white transition hover:bg-white/10 focus-visible:outline-white"><x-schedule-icon name="room" class="h-4 w-4" />Ruangan Saya</a>
+</x-dashboard-hero>
 
 <section aria-label="Ringkasan tugas PIC" class="mb-6 grid gap-4 sm:grid-cols-3">
     @foreach($stats as $stat)
-        <div class="rounded-2xl border border-slate-200/80 bg-surface p-5 shadow-sm">
-            <div class="flex items-center justify-between gap-3">
-                <h2 class="text-base font-medium text-slate-600">{{ $stat['label'] }}</h2>
-                <span class="rounded-lg bg-secondaryLight/20 p-2 text-primary"><x-schedule-icon :name="$stat['icon']" /></span>
-            </div>
-            <p class="mt-4 text-3xl font-bold text-primaryDark">{{ $stat['value'] }}</p>
-            <p class="mt-2 text-sm text-slate-500">{{ $stat['description'] }}</p>
-        </div>
+        <x-stat-card :label="$stat['label']" :value="$stat['value']" :description="$stat['description']" :icon="$stat['icon']" :tone="$loop->first && $stat['value'] > 0 ? 'warning' : 'primary'" />
     @endforeach
 </section>
 
-<div class="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_300px]">
-    <div class="min-w-0 space-y-6">
-        <section aria-labelledby="activity-title" class="overflow-hidden rounded-2xl border border-slate-200/80 bg-surface shadow-sm">
-            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 p-5 sm:px-6">
-                <h2 id="activity-title" class="text-lg font-bold text-primaryDark">Menunggu Tinjauan Anda</h2>
-                <span class="rounded-md bg-background px-3 py-1 text-sm font-medium text-slate-600">Approval Ruangan</span>
-            </div>
-            <div class="px-6 py-10 text-center">
+<div class="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
+    <x-workspace-panel title="Menunggu Tinjauan Anda" description="Tinjau permintaan approval ruangan Anda, mulai dari jadwal terdekat.">
+        <x-slot:headingActions>
+            <a href="{{ route('pic.approvals.index') }}" class="workspace-button-secondary">Buka permintaan</a>
+        </x-slot:headingActions>
+        @if($pendingApprovals->isNotEmpty())
+            <ul class="divide-y divide-slate-100 p-2 sm:p-3">
+                @foreach($pendingApprovals as $booking)
+                    @include('shared.dashboard-booking-item', ['booking' => $booking, 'href' => route('pic.approvals.show', $booking), 'meta' => $booking->applicant?->name])
+                @endforeach
+            </ul>
+        @else
+            <div class="px-6 py-12 text-center">
                 <span class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-background text-primary"><x-schedule-icon name="clock" class="h-7 w-7" /></span>
-                <h3 class="mt-4 text-base font-semibold text-primaryDark">Tinjau permintaan approval</h3>
-                <p class="mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-600">Permintaan untuk ruangan yang ditugaskan kepada Anda tersedia di halaman Permintaan Approval.</p>
-                <a href="{{ route('pic.approvals.index') }}" class="mt-5 inline-flex items-center gap-2 text-base font-semibold text-primary hover:underline">Buka permintaan<x-schedule-icon name="arrow" class="h-4 w-4" /></a>
+                <h3 class="mt-4 text-base font-semibold text-primaryDark">Semua pengajuan sudah ditinjau</h3>
+                <p class="mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-600">Pengajuan baru untuk ruangan Anda akan muncul di sini.</p>
             </div>
-        </section>
-    </div>
+        @endif
+    </x-workspace-panel>
 
     <aside class="min-w-0 space-y-5">
         @include('shared.dashboard-account')
+        <a href="{{ route('pic.approvals.history') }}" class="group flex items-center gap-4 rounded-2xl border border-slate-200/80 bg-surface p-5 shadow-sm transition hover:border-secondary">
+            <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-background text-primary"><x-schedule-icon name="calendar" class="h-5 w-5" /></span>
+            <span class="min-w-0 flex-1"><span class="block font-semibold text-primaryDark">Riwayat Approval</span><span class="mt-0.5 block text-sm text-slate-600">Keputusan yang sudah Anda buat.</span></span>
+            <x-schedule-icon name="arrow" class="h-4 w-4 shrink-0 text-primary transition group-hover:translate-x-1" />
+        </a>
     </aside>
 </div>

@@ -11,8 +11,11 @@ class DashboardController extends Controller
 {
     public function index(Request $request): View
     {
-        return view('admin.dashboard', app(AdminDashboard::class)->data($request->user()) + [
-            'user' => $request->user()->load('organizationalUnit'),
+        $user = $request->user()->load(['organizationalUnit', 'branches']);
+
+        return view('admin.dashboard', app(AdminDashboard::class)->data($user) + [
+            'user' => $user,
+            'scopeLabel' => $user->isSuperAdmin() ? 'Semua lokasi' : ($user->branches->pluck('name')->implode(', ') ?: 'Lokasi belum diatur'),
             'title' => 'Dashboard Admin',
         ]);
     }

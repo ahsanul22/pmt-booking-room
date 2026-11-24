@@ -4,26 +4,25 @@
 @section('breadcrumb', 'Dashboard')
 
 @section('content')
-    <div class="mb-7 flex flex-wrap items-center justify-between gap-5">
-        <div>
-            <p class="mb-2 text-sm font-bold uppercase tracking-[0.2em] text-primary">Administrasi Workspace</p>
-            <h1 class="text-3xl font-bold tracking-tight text-primaryDark sm:text-4xl">{{ $title }}</h1>
-            <p class="mt-3 text-base leading-6 text-slate-600">Pantau kondisi ruangan, kelengkapan pengaturan, dan data pengguna.</p>
-        </div>
-        <a href="{{ route('admin.rooms.create') }}" class="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-base font-semibold text-white shadow-sm transition hover:bg-primaryDark"><x-schedule-icon name="plus" />Tambah Ruangan</a>
-    </div>
-
     @if(session('status'))
         <div role="status" class="mb-6 rounded-xl border border-secondaryLight bg-surface p-4 text-base text-primaryDark">{{ session('status') }}</div>
     @endif
 
+    <x-dashboard-hero eyebrow="Administrasi Workspace" :title="$title" description="Pantau kondisi ruangan, kelengkapan pengaturan, dan data pengguna.">
+        <a href="{{ route('admin.rooms.create') }}" class="inline-flex min-h-[48px] items-center gap-2 rounded-xl bg-surface px-5 py-3 text-base font-semibold text-primaryDark transition hover:bg-secondaryLight focus-visible:outline-white"><x-schedule-icon name="plus" class="h-4 w-4" />Tambah Ruangan</a>
+        <a href="{{ route('admin.schedule.index') }}" class="inline-flex min-h-[48px] items-center gap-2 rounded-xl border border-white/40 px-5 py-3 text-base font-semibold text-white transition hover:bg-white/10 focus-visible:outline-white"><x-schedule-icon name="calendar" class="h-4 w-4" />Jadwal Ruangan</a>
+        <x-slot:aside>
+            <dl class="grid gap-1 rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-sm text-white/85 backdrop-blur-sm lg:min-w-[240px]">
+                <div class="flex justify-between gap-4"><dt>Role</dt><dd class="font-semibold text-white">{{ $user->roleLabel() }}</dd></div>
+                <div class="flex justify-between gap-4"><dt>Lokasi</dt><dd class="text-right font-semibold text-white">{{ $scopeLabel }}</dd></div>
+                <div class="flex justify-between gap-4"><dt>Unit Kerja</dt><dd class="text-right font-semibold text-white">{{ $user->organizationalUnit?->name ?? 'Belum ditentukan' }}</dd></div>
+            </dl>
+        </x-slot:aside>
+    </x-dashboard-hero>
+
     <section aria-label="Ringkasan administrasi" class="mb-6 grid gap-4 sm:grid-cols-3">
         @foreach($stats as $stat)
-            <div class="rounded-2xl border border-slate-200/80 bg-surface p-5 shadow-sm">
-                <div class="flex items-center justify-between gap-3"><h2 class="text-base font-medium text-slate-600">{{ $stat['label'] }}</h2><span class="rounded-lg bg-secondaryLight/20 p-2 text-primary"><x-schedule-icon :name="$stat['icon']" /></span></div>
-                <p class="mt-4 text-3xl font-semibold text-primaryDark">{{ $stat['value'] }}</p>
-                <p class="mt-2 text-sm text-slate-500">{{ $stat['description'] }}</p>
-            </div>
+            <x-stat-card :label="$stat['label']" :value="$stat['value']" :description="$stat['description']" :icon="$stat['icon']" />
         @endforeach
     </section>
 
