@@ -1,122 +1,94 @@
 @extends('layouts.public')
 @section('title', 'Selamat Datang di Booking Room')
+@push('head')
+    <link rel="preload" as="image" href="{{ asset('images/home-harbor.jpg') }}">
+@endpush
 @section('content')
-<div class="grid w-full min-w-0 gap-6 sm:gap-8">
-<section aria-labelledby="welcome-title" class="grid w-full min-w-0 items-center gap-8 overflow-hidden rounded-3xl border border-secondaryLight/50 bg-surface p-6 sm:p-10 lg:p-12 lg:grid-cols-2 lg:gap-16">
-    <div class="flex min-w-0 flex-col items-start justify-center text-primaryDark lg:order-2">
-        <p class="flex items-center gap-3 text-base font-bold tracking-normal text-primary sm:text-base">Pelindo Multi Terminal</p>
-        <h1 id="welcome-title" class="mt-6 text-4xl font-bold leading-[1.12] tracking-tight sm:text-5xl">Pertemuan yang baik.<br><span class="text-primary">Dimulai di sini.</span></h1>
-        <p class="mt-6 max-w-lg text-base leading-7 text-slate-600 sm:text-lg sm:leading-8">Selamat datang di Booking Room PT Pelindo Multi Terminal. Ruang untuk bertukar ide, menyatukan rencana, dan membawa kolaborasi lebih jauh.</p>
-        <div class="mt-8 flex flex-wrap gap-4">
-            <a href="{{ route('guests.register') }}" class="workspace-button-secondary">Pendataan Tamu</a>
-        </div>
-        <p class="mt-5 max-w-md text-base leading-7 text-slate-600">Login dengan akun pegawai untuk melihat jadwal dan melakukan booking.</p>
-    </div>
-    <figure class="relative w-full min-w-0 overflow-hidden rounded-2xl border border-secondaryLight/40 bg-background lg:order-1">
-        <img src="{{ asset('images/Beranda.jpeg') }}" alt="Ilustrasi area diskusi dengan meja bundar dan kursi biru menghadap pelabuhan." width="1254" height="1254" fetchpriority="high" class="h-[240px] w-full object-cover sm:h-[320px] lg:h-[400px]">
-        <figcaption class="space-y-3 p-6 sm:p-8">
-            <p class="text-base font-bold tracking-normal text-primary">Ruang untuk berkolaborasi</p>
-            <p class="mt-2 text-xl font-semibold text-primaryDark">Satu meja. Banyak kemungkinan.</p>
-            <p class="mt-2 text-base text-slate-600">Ilustrasi suasana ruang rapat</p>
-        </figcaption>
-    </figure>
-</section>
-
-<section aria-labelledby="steps-title" class="w-full min-w-0 rounded-3xl border border-secondaryLight/50 bg-surface p-6 sm:p-10 lg:p-12">
-    <div class="text-center">
-        <p class="text-sm font-semibold tracking-normal text-primary">Tiga langkah sederhana</p>
-        <h2 id="steps-title" class="mx-auto mt-4 max-w-xl text-2xl font-semibold leading-snug text-primaryDark sm:text-3xl">Rapat terencana, kerja lebih nyaman.</h2>
-    </div>
-    <ol class="relative mx-auto mt-12 grid max-w-6xl gap-10 md:grid-cols-3 md:gap-8">
-        @foreach ([
-            ['number' => '01', 'title' => 'Masuk', 'description' => 'Gunakan akun pegawai Anda.'],
-            ['number' => '02', 'title' => 'Rencanakan', 'description' => 'Pilih ruangan, waktu, dan agenda.'],
-            ['number' => '03', 'title' => 'Pantau', 'description' => 'Lihat hasil pengajuan di My Booking.'],
-        ] as $step)
-            <li class="relative flex items-center gap-5 md:flex-col md:text-center">
-                @unless ($loop->last)
-                    <span aria-hidden="true" class="absolute left-10 top-20 h-[calc(100%-2.5rem)] w-px bg-secondaryLight md:left-1/2 md:top-14 md:h-px md:w-[calc(100%+2rem)]"></span>
-                @endunless
-                <div class="relative z-10 flex h-20 w-20 shrink-0 flex-col items-center justify-center gap-1 rounded-full border border-secondaryLight bg-background ring-8 ring-surface md:h-28 md:w-28">
-                    <span class="text-xl font-bold text-primary md:text-2xl">{{ $step['number'] }}</span>
-                    <h3 class="text-sm font-semibold text-primaryDark">{{ $step['title'] }}</h3>
+<div class="grid w-full min-w-0 gap-8 sm:gap-12">
+    {{-- Hero: foto pelabuhan dengan lapisan gradien agar teks tetap kontras. --}}
+    <section aria-labelledby="welcome-title" class="relative isolate overflow-hidden rounded-3xl bg-primaryDark">
+        <img src="{{ asset('images/home-harbor.jpg') }}" alt="" width="1536" height="1024" fetchpriority="high" class="absolute inset-0 -z-20 h-full w-full object-cover object-[70%_center]">
+        <div aria-hidden="true" class="absolute inset-0 -z-10 bg-gradient-to-r from-primaryDark via-primaryDark/85 to-primaryDark/20"></div>
+        <div class="grid gap-10 px-6 py-14 sm:px-10 sm:py-20 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:items-center lg:px-14 lg:py-24">
+            <div class="min-w-0 text-white">
+                <p class="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-sm font-semibold text-secondaryLight backdrop-blur-sm">
+                    <span aria-hidden="true" class="h-2 w-2 rounded-full bg-secondary"></span>Booking Ruang Rapat Internal
+                </p>
+                <h1 id="welcome-title" class="mt-6 max-w-2xl text-4xl font-bold leading-[1.1] tracking-tight sm:text-5xl lg:text-6xl">Pertemuan yang baik dimulai di <span class="text-secondaryLight">ruang yang tepat.</span></h1>
+                <p class="mt-6 max-w-xl text-base leading-7 text-white/85 sm:text-lg sm:leading-8">Cek ketersediaan, ajukan booking, dan pantau persetujuan ruang rapat PT Pelindo Multi Terminal dalam satu tempat.</p>
+                <div class="mt-9 flex flex-wrap gap-3">
+                    <a href="{{ route('login') }}" class="inline-flex min-h-[48px] items-center gap-2 rounded-xl bg-surface px-6 py-3 text-base font-semibold text-primaryDark shadow-lg shadow-black/10 transition hover:bg-secondaryLight focus-visible:outline-white">Masuk sebagai Pegawai<x-schedule-icon name="arrow" class="h-4 w-4" /></a>
+                    <a href="{{ route('guests.register') }}" class="inline-flex min-h-[48px] items-center gap-2 rounded-xl border border-white/40 px-6 py-3 text-base font-semibold text-white transition hover:bg-white/10 focus-visible:outline-white">Pendataan Tamu</a>
                 </div>
-                <p class="relative max-w-xs text-base leading-7 text-slate-600 md:mt-3">{{ $step['description'] }}</p>
-            </li>
-        @endforeach
-    </ol>
-    <div class="mt-12 flex w-full items-start gap-4 rounded-2xl bg-secondaryLight/20 p-5 sm:p-6">
-        <x-schedule-icon name="clock" class="mt-1 h-5 w-5 shrink-0 text-primary" />
-        <p class="text-base leading-7 text-primaryDark">Booking dapat diajukan tanpa batas minimal waktu sebelum rapat. Ruangan tertentu memerlukan persetujuan PIC.</p>
-    </div>
-</section>
-
-
-<!-- Features Section -->
-<section class="w-full min-w-0" aria-labelledby="features-title">
-    <div class="mb-10 max-w-2xl sm:mb-12">
-        <h2 id="features-title" class="text-2xl font-bold tracking-tight text-primaryDark sm:text-3xl">Fasilitas & Keunggulan</h2>
-        <p class="mt-5 max-w-xl text-base leading-7 text-slate-600 sm:text-lg sm:leading-8">Kami merancang platform ini untuk memberikan pengalaman pemesanan ruang rapat yang modern, ringkas, dan transparan.</p>
-    </div>
-
-    <div class="grid gap-6 lg:grid-cols-3">
-        <!-- Feature 1 -->
-        <div class="rounded-2xl border border-secondaryLight/50 bg-surface p-6 sm:p-10 lg:p-12">
-            <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-secondaryLight/20 text-primary">
-                <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
             </div>
-            <h3 class="text-xl font-semibold text-primaryDark">Informasi Real-time</h3>
-            <p class="mt-5 max-w-sm text-base leading-8 text-slate-600">Cek ketersediaan jadwal seketika tanpa harus menghubungi pengelola ruangan. Semua tersinkronisasi akurat.</p>
+
+            <ul class="hidden min-w-0 gap-3 lg:grid" aria-label="Yang bisa dilakukan">
+                @foreach ([
+                    ['icon' => 'calendar', 'title' => 'Jadwal terkini', 'text' => 'Lihat jam yang sudah terisi sebelum mengajukan.'],
+                    ['icon' => 'room', 'title' => 'Booking dalam satu form', 'text' => 'Ruangan, waktu, agenda, dan kebutuhan rapat.'],
+                    ['icon' => 'clock', 'title' => 'Status yang jelas', 'text' => 'Pending, Approved, atau Rejected beserta alasannya.'],
+                ] as $item)
+                    <li class="flex items-start gap-4 rounded-2xl border border-white/15 bg-white/10 p-5 text-white backdrop-blur-md">
+                        <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/15 text-secondaryLight"><x-schedule-icon :name="$item['icon']" class="h-5 w-5" /></span>
+                        <span class="min-w-0"><span class="block text-base font-semibold">{{ $item['title'] }}</span><span class="mt-1 block text-sm leading-6 text-white/75">{{ $item['text'] }}</span></span>
+                    </li>
+                @endforeach
+            </ul>
         </div>
-        <!-- Feature 2 -->
-        <div class="rounded-2xl border border-secondaryLight/50 bg-surface p-6 sm:p-10 lg:p-12">
-            <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-secondaryLight/20 text-primary">
-                <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-                </svg>
+    </section>
+
+    {{-- Cara kerja --}}
+    <section aria-labelledby="steps-title" class="min-w-0">
+        <div class="max-w-2xl">
+            <p class="text-sm font-bold uppercase tracking-[0.18em] text-primary">Cara kerja</p>
+            <h2 id="steps-title" class="mt-3 text-2xl font-bold tracking-tight text-primaryDark sm:text-3xl">Tiga langkah, rapat siap.</h2>
+        </div>
+        <ol class="mt-8 grid gap-4 md:grid-cols-3">
+            @foreach ([
+                ['title' => 'Masuk', 'text' => 'Gunakan akun pegawai yang diberikan Admin kantor Anda.'],
+                ['title' => 'Pilih ruangan dan waktu', 'text' => 'Sistem menolak jam yang bentrok, jadi slot yang Anda ajukan pasti masih kosong.'],
+                ['title' => 'Pantau di My Booking', 'text' => 'Ruangan tertentu perlu persetujuan PIC. Hasilnya tampil di riwayat booking Anda.'],
+            ] as $step)
+                <li class="relative min-w-0 rounded-2xl border border-slate-200/80 bg-surface p-6 shadow-sm">
+                    <span class="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-base font-bold text-white">{{ $loop->iteration }}</span>
+                    <h3 class="mt-5 text-lg font-semibold text-primaryDark">{{ $step['title'] }}</h3>
+                    <p class="mt-2 text-base leading-7 text-slate-600">{{ $step['text'] }}</p>
+                </li>
+            @endforeach
+        </ol>
+    </section>
+
+    {{-- Peran pengguna --}}
+    <section aria-labelledby="roles-title" class="min-w-0 rounded-3xl border border-slate-200/80 bg-surface p-6 shadow-sm sm:p-10">
+        <div class="grid gap-8 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,2fr)] lg:gap-12">
+            <div>
+                <p class="text-sm font-bold uppercase tracking-[0.18em] text-primary">Satu sistem</p>
+                <h2 id="roles-title" class="mt-3 text-2xl font-bold tracking-tight text-primaryDark sm:text-3xl">Setiap peran punya ruang kerjanya.</h2>
+                <p class="mt-4 text-base leading-7 text-slate-600">Menu dan data menyesuaikan peran serta kantor/cabang akun Anda.</p>
             </div>
-            <h3 class="text-xl font-semibold text-primaryDark">Booking Cepat</h3>
-            <p class="mt-5 max-w-sm text-base leading-8 text-slate-600">Proses pengajuan yang ringkas dan terarah. Dalam beberapa klik, jadwal Anda langsung tercatat di sistem.</p>
+            <ul class="grid gap-4 sm:grid-cols-3">
+                @foreach ([
+                    ['icon' => 'room', 'title' => 'Pegawai', 'text' => 'Mengajukan booking, mencantumkan tamu rapat, dan memantau status.'],
+                    ['icon' => 'clock', 'title' => 'PIC Ruangan', 'text' => 'Meninjau dan memutuskan pengajuan untuk ruangan yang ditugaskan.'],
+                    ['icon' => 'grid', 'title' => 'Admin', 'text' => 'Mengelola ruangan, akun, akses unit, serta laporan bulanan.'],
+                ] as $role)
+                    <li class="min-w-0 rounded-2xl bg-background p-5">
+                        <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-surface text-primary shadow-sm"><x-schedule-icon :name="$role['icon']" class="h-5 w-5" /></span>
+                        <h3 class="mt-4 text-base font-semibold text-primaryDark">{{ $role['title'] }}</h3>
+                        <p class="mt-2 text-sm leading-6 text-slate-600">{{ $role['text'] }}</p>
+                    </li>
+                @endforeach
+            </ul>
         </div>
-        <!-- Feature 3 -->
-        <div class="rounded-2xl border border-secondaryLight/50 bg-surface p-6 sm:p-10 lg:p-12">
-            <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-secondaryLight/20 text-primary">
-                <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            </div>
-            <h3 class="text-xl font-semibold text-primaryDark">Persetujuan Terpusat</h3>
-            <p class="mt-5 max-w-sm text-base leading-8 text-slate-600">Pantau langsung status persetujuan dari pengelola ruangan melalui halaman riwayat My Booking Anda.</p>
-        </div>
-    </div>
-</section>
+    </section>
 
-<!-- Call to Action Banner -->
-<section class="relative w-full min-w-0 overflow-hidden rounded-3xl bg-primaryDark p-6 sm:p-10 lg:p-12">
-    <div class="pointer-events-none absolute -left-20 -top-20 h-64 w-64 rounded-full bg-white/10 blur-3xl"></div>
-    <div class="pointer-events-none absolute -bottom-20 -right-20 h-64 w-64 rounded-full bg-secondary/20 blur-3xl"></div>
-
-    <div class="relative z-10 grid gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-x-16">
-        <h2 class="max-w-md text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl">
-            Transformasi Cara Kita Berkolaborasi.
-        </h2>
-        <div class="max-w-xl space-y-8 text-base leading-8 text-white/90 sm:text-lg sm:leading-9">
-            <p>
-                Di PT Pelindo Multi Terminal, kami menyadari bahwa setiap keputusan penting, strategi brilian, dan inovasi masa depan selalu berawal dari sebuah diskusi yang produktif di dalam ruang rapat.
-            </p>
-            <p>
-                Melalui platform Booking Room terpadu ini, kami menghadirkan ekosistem kerja cerdas yang mengeliminasi kerumitan administratif. Hilangkan waktu yang terbuang untuk mencocokkan jadwal, dan tuangkan seluruh fokus Anda pada hal yang benar-benar esensial: <strong class="font-semibold text-white">Berbagi ide dan menciptakan solusi bersama.</strong>
-            </p>
+    {{-- Ajakan untuk tamu --}}
+    <section aria-labelledby="guest-title" class="flex flex-col items-start justify-between gap-6 rounded-3xl bg-gradient-to-r from-primaryDark to-primary p-6 text-white sm:p-10 md:flex-row md:items-center">
+        <div class="max-w-2xl">
+            <h2 id="guest-title" class="text-2xl font-bold tracking-tight sm:text-3xl">Datang sebagai tamu?</h2>
+            <p class="mt-3 text-base leading-7 text-white/85">Isi pendataan tamu untuk melihat jadwal ruangan umum di kantor tujuan. Booking tetap diajukan oleh pegawai yang mengundang Anda.</p>
         </div>
-        <div class="border-t border-white/20 pt-8 lg:col-span-2">
-            <p class="text-sm font-bold tracking-normal text-secondaryLight sm:text-[15px]">
-                Langkah Cerdas &bull; Hasil Maksimal
-            </p>
-        </div>
-    </div>
-</section>
-
+        <a href="{{ route('guests.register') }}" class="inline-flex min-h-[48px] shrink-0 items-center gap-2 rounded-xl bg-surface px-6 py-3 text-base font-semibold text-primaryDark transition hover:bg-secondaryLight focus-visible:outline-white">Isi Pendataan Tamu<x-schedule-icon name="arrow" class="h-4 w-4" /></a>
+    </section>
 </div>
 @endsection
