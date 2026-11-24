@@ -1,103 +1,44 @@
-<section aria-labelledby="booking-intro" class="mb-6 overflow-hidden rounded-3xl border border-secondaryLight/50 bg-surface p-6 sm:p-8 lg:p-12">
-    <div class="grid min-w-0 items-center gap-8 lg:grid-cols-2 lg:gap-16">
-    <div class="flex min-w-0 flex-col justify-center">
-        <p class="flex items-center gap-3 text-sm sm:text-base font-bold uppercase tracking-[0.1em] text-primary">Ruang untuk berkolaborasi</p>
-        <p class="mt-3 break-words text-base font-medium leading-7 text-slate-600">Selamat datang, {{ $user->name }}.</p>
-        <h2 id="booking-intro" class="mt-6 text-4xl font-bold leading-[1.15] tracking-tight text-primaryDark sm:text-5xl xl:text-6xl">Ruang yang tepat.<br><span class="text-primary">Ide yang hebat.</span></h2>
-        <p class="mt-6 max-w-xl text-base leading-7 text-slate-600 sm:text-lg sm:leading-8">Temukan ruang untuk pertemuan Anda, tentukan waktu dan agenda, lalu ajukan booking. Pantau status pengajuan melalui My Booking agar rencana rapat tetap jelas.</p>
-        <div class="mt-8 flex flex-wrap gap-3">
-            <a href="{{ route('rooms.index') }}" class="workspace-button px-6 py-3.5 text-base">Booking Ruangan<x-schedule-icon name="arrow" class="h-4 w-4" /></a>
-            <a href="{{ route('my-bookings.index') }}" class="workspace-button-secondary px-6 py-3.5 text-base">My Booking<x-schedule-icon name="clock" class="h-4 w-4" /></a>
-        </div>
-        <div class="mt-8 flex max-w-xl items-start gap-3 border-t border-secondaryLight/60 pt-5">
-            <x-schedule-icon name="clock" class="mt-1 h-5 w-5 shrink-0 text-primary" />
-            <p class="text-base leading-7 text-slate-600">Booking dapat diajukan tanpa batas minimal waktu sebelum rapat. Ruangan tertentu memerlukan persetujuan PIC.</p>
-        </div>
-    </div>
-    <figure class="relative w-full min-w-0 overflow-hidden rounded-2xl border border-secondaryLight/40 bg-background">
-        <img src="{{ asset('images/dashboard-meeting-room.jpg') }}" alt="Ilustrasi ruang rapat modern dengan kursi biru dan pemandangan pelabuhan." width="1122" height="1402" fetchpriority="high" class="h-[240px] w-full object-cover sm:h-[320px] lg:h-[400px]">
-        <figcaption class="p-5 sm:p-6">
-            <p class="text-sm font-semibold uppercase tracking-[0.1em] text-primary">Satu ruang, banyak ide.</p>
-            <p class="mt-2 text-lg font-semibold text-primaryDark">Tempat untuk langkah besar berikutnya.</p>
-            <p class="mt-2 text-base text-slate-600">Ilustrasi suasana ruang rapat</p>
-        </figcaption>
-    </figure>
-    </div>
+<x-dashboard-hero :eyebrow="$title" :title="'Selamat datang, '.$user->name" description="Ruang yang tepat. Ide yang hebat. Pilih ruangan, tentukan waktu dan agenda, lalu pantau statusnya di sini.">
+    <a href="{{ route('rooms.index') }}" class="inline-flex min-h-[48px] items-center gap-2 rounded-xl bg-surface px-5 py-3 text-base font-semibold text-primaryDark transition hover:bg-secondaryLight focus-visible:outline-white">Booking Ruangan<x-schedule-icon name="arrow" class="h-4 w-4" /></a>
+    <a href="{{ route('schedule.index') }}" class="inline-flex min-h-[48px] items-center gap-2 rounded-xl border border-white/40 px-5 py-3 text-base font-semibold text-white transition hover:bg-white/10 focus-visible:outline-white"><x-schedule-icon name="calendar" class="h-4 w-4" />Jadwal Ruangan</a>
+</x-dashboard-hero>
+
+<section aria-label="Ringkasan booking Anda" class="mb-6 grid gap-4 sm:grid-cols-3">
+    @foreach($stats as $stat)
+        <x-stat-card :label="$stat['label']" :value="$stat['value']" :description="$stat['description']" :icon="$stat['icon']" :tone="$stat['tone']" />
+    @endforeach
 </section>
 
-<section class="relative my-4 overflow-hidden rounded-3xl bg-gradient-to-r from-primaryDark to-primary px-6 py-10 shadow-2xl sm:px-12 sm:py-14">
-    <!-- Decorative background elements -->
-    <div class="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-white/10 blur-3xl"></div>
-    <div class="pointer-events-none absolute -bottom-24 -left-24 h-96 w-96 rounded-full bg-blue-400/20 blur-3xl"></div>
-
-    <div class="relative z-10 grid gap-10 md:items-center lg:grid-cols-[1.2fr_1fr]">
-        <!-- Bagian Kiri: 3 Langkah (Dari Rencana Menjadi Pertemuan) -->
-        <div class="space-y-8">
-            <div>
-                <span class="inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-1.5 text-base font-semibold tracking-wider text-white backdrop-blur-md">
-                    ALUR PEMESANAN
-                </span>
-                <h2 class="mt-5 text-3xl font-bold tracking-tight text-white sm:text-4xl">
-                    Dari Rencana<br>Menjadi Pertemuan
-                </h2>
-                <p class="mt-4 text-lg leading-relaxed text-blue-100">
-                    Proses pemesanan ruangan dirancang simpel dalam tiga tahapan.
-                </p>
+<div class="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
+    <x-workspace-panel title="Rapat Mendatang" description="Booking Pending dan Approved yang belum berakhir.">
+        <x-slot:headingActions>
+            <a href="{{ route('my-bookings.index') }}" class="workspace-button-secondary">My Booking</a>
+        </x-slot:headingActions>
+        @if($upcomingBookings->isNotEmpty())
+            <ul class="divide-y divide-slate-100 p-2 sm:p-3">
+                @foreach($upcomingBookings as $booking)
+                    @include('shared.dashboard-booking-item', ['booking' => $booking, 'href' => route('my-bookings.show', $booking), 'meta' => $booking->agenda])
+                @endforeach
+            </ul>
+        @else
+            <div class="px-6 py-12 text-center">
+                <span class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-background text-primary"><x-schedule-icon name="calendar" class="h-7 w-7" /></span>
+                <h3 class="mt-4 text-base font-semibold text-primaryDark">Belum ada rapat terjadwal</h3>
+                <p class="mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-600">Cari ruangan yang sesuai dan ajukan booking. Pengajuan Anda akan tampil di sini.</p>
+                <a href="{{ route('rooms.index') }}" class="mt-5 inline-flex items-center gap-2 text-base font-semibold text-primary hover:underline">Mulai booking<x-schedule-icon name="arrow" class="h-4 w-4" /></a>
             </div>
+        @endif
+    </x-workspace-panel>
 
-            <div class="flex flex-col gap-5">
-                <div class="flex items-start gap-4">
-                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/20 font-bold text-white shadow-inner backdrop-blur-md">01</div>
-                    <div class="pt-1">
-                        <h3 class="text-lg font-semibold text-white">Pilih Ruangan</h3>
-                        <p class="mt-1 text-base text-blue-200">Pilih ruangan dengan fasilitas yang sesuai kebutuhan.</p>
-                    </div>
-                </div>
-                <div class="flex items-start gap-4">
-                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/20 font-bold text-white shadow-inner backdrop-blur-md">02</div>
-                    <div class="pt-1">
-                        <h3 class="text-lg font-semibold text-white">Atur Waktu & Agenda</h3>
-                        <p class="mt-1 text-base text-blue-200">Tentukan tanggal, jam, dan kelengkapan rapat secara langsung.</p>
-                    </div>
-                </div>
-                <div class="flex items-start gap-4">
-                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/20 font-bold text-white shadow-inner backdrop-blur-md">03</div>
-                    <div class="pt-1">
-                        <h3 class="text-lg font-semibold text-white">Pantau Pengajuan</h3>
-                        <p class="mt-1 text-base text-blue-200">Lacak status persetujuan dari pengelola dan kelola pesanan Anda.</p>
-                    </div>
-                </div>
-            </div>
-            
-
-        </div>
-        
-        <!-- Bagian Kanan: Visi & Modernisasi -->
-        <div class="relative hidden md:flex md:flex-col md:justify-center">
-            <div class="relative mx-auto w-full overflow-hidden rounded-2xl border border-white/20 bg-white/10 p-8 shadow-2xl backdrop-blur-xl transition-all duration-500 hover:-translate-y-2 hover:bg-white/15 hover:shadow-black/20">
-                <div class="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 text-white shadow-lg">
-                    <x-schedule-icon name="room" class="h-8 w-8" />
-                </div>
-                <h3 class="mb-4 text-2xl font-bold text-white">Sistem Booking Modern</h3>
-                <p class="mb-6 text-base leading-relaxed text-blue-100">
-                    Efisiensi waktu adalah kunci kesuksesan. Platform Manajemen Ruang ini hadir untuk memberikan kemudahan akses, transparansi ketersediaan, serta pengelolaan kolaborasi secara profesional di lingkungan PT Pelindo Multi Terminal.
-                </p>
-                <div class="mt-2 border-t border-white/10 pt-5">
-                    <p class="text-base font-semibold uppercase tracking-wider text-blue-200">Fokus pada Produktivitas</p>
-                    <p class="mt-1 text-sm text-blue-100 opacity-80">Kolaborasi hebat selalu dimulai dari ruangan yang tepat.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<div class="mt-8 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
-    <section aria-labelledby="next-step-title" class="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-surface p-6 transition-colors group hover:border-primary/30 sm:p-8">
-        <div class="absolute right-0 top-0 -mr-4 -mt-4 h-32 w-32 rounded-full bg-primary/5 blur-3xl transition-colors group-hover:bg-primary/10"></div>
-        <h2 id="next-step-title" class="relative z-10 text-2xl font-bold tracking-tight text-primaryDark">Rencanakan dengan Sempurna.</h2>
-        <p class="relative z-10 mt-4 max-w-2xl text-lg leading-relaxed text-slate-600">
-            Setiap ide besar berawal dari ruang dan waktu yang tepat. Pastikan kelancaran agenda Anda dengan mengecek <a href="{{ route('schedule.index') }}" class="font-semibold text-primary underline decoration-primary/30 decoration-2 underline-offset-4 transition-colors hover:text-primaryDark hover:decoration-primary">Kalender Ketersediaan</a> secara real-time, atau pantau seluruh aktivitas pertemuan Anda melalui <a href="{{ route('my-bookings.index') }}" class="font-semibold text-primary underline decoration-primary/30 decoration-2 underline-offset-4 transition-colors hover:text-primaryDark hover:decoration-primary">Riwayat Booking</a>.
-        </p>
-    </section>
-    @include('shared.dashboard-account')
+    <aside class="min-w-0 space-y-5">
+        @include('shared.dashboard-account')
+        <section aria-labelledby="tips-title" class="rounded-2xl border border-secondaryLight/70 bg-secondaryLight/15 p-6">
+            <h2 id="tips-title" class="font-bold text-primaryDark">Sebelum mengajukan</h2>
+            <ul class="mt-3 space-y-2 text-sm leading-6 text-slate-700">
+                <li class="flex gap-2"><span aria-hidden="true" class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary"></span>Cek Jadwal Ruangan agar waktu yang dipilih tidak bentrok.</li>
+                <li class="flex gap-2"><span aria-hidden="true" class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary"></span>Ruangan tertentu memerlukan persetujuan PIC.</li>
+                <li class="flex gap-2"><span aria-hidden="true" class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary"></span>Cantumkan nama tamu bila rapat dihadiri pihak luar.</li>
+            </ul>
+        </section>
+    </aside>
 </div>

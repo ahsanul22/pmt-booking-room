@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -118,12 +119,17 @@ class User extends Authenticatable
             return 0;
         }
 
+        return $this->pendingApprovalsQuery()->count();
+    }
+
+    /** Pending bookings this PIC/Admin may decide; same scope as the approval queue. */
+    public function pendingApprovalsQuery(): Builder
+    {
         return Booking::query()->whereIn('room_id', Room::query()->visibleTo($this)->select('rooms.id'))
             ->where('requires_approval', true)
             ->where('status', 'pending')
             ->when(! $this->can('access-admin'), fn ($query) => $query
-                ->whereHas('room.pics', fn ($pics) => $pics->where('users.id', $this->id)))
-            ->count();
+                ->whereHas('room.pics', fn ($pics) => $pics->where('users.id', $this->id)));
     }
 
     /**

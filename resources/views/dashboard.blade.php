@@ -4,20 +4,6 @@
 @section('breadcrumb', 'Dashboard')
 
 @section('content')
-    @can('access-pic')
-        <div class="mb-7 flex flex-wrap items-center justify-between gap-5">
-            <div>
-                <p class="mb-2 text-sm font-bold uppercase tracking-[0.2em] text-primary">Workspace PIC Ruangan</p>
-                <h1 class="text-3xl font-bold tracking-tight text-primaryDark sm:text-4xl">{{ $title }}</h1>
-                <p class="mt-3 text-base leading-6 text-slate-600">Periksa pengajuan dan pastikan ketersediaan ruangan tanggung jawab Anda.</p>
-            </div>
-        </div>
-    @else
-        <div class="sr-only">
-            <h1 class="text-3xl font-bold tracking-tight text-primaryDark sm:text-4xl">{{ $title }}</h1>
-            <p class="mt-3 break-words text-base leading-6 text-slate-600">Selamat datang, {{ $user->name }}.</p>
-        </div>
-    @endcan
     @if(session('status'))
         <div role="status" class="mb-6 rounded-xl border border-secondaryLight bg-surface p-4 text-base text-primaryDark">{{ session('status') }}</div>
     @endif
