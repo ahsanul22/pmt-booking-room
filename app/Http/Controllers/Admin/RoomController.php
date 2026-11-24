@@ -24,7 +24,12 @@ class RoomController extends Controller
     {
         return view('admin.rooms.index', [
             'branches' => $this->branches($request),
-            'rooms' => Room::query()->visibleTo($request->user())->with(['branch', 'floor', 'facilities'])->when($request->filled('branch_id'), fn ($query) => $query->where('branch_id', $request->integer('branch_id')))->orderBy('name')->orderBy('id')->paginate(20)->withQueryString(),
+            'rooms' => Room::query()->visibleTo($request->user())->with(['branch', 'floor', 'facilities', 'pics:id,name'])
+                ->withCount([
+                    'allowedOrganizationalUnits',
+                    'bookings as today_bookings_count' => fn ($query) => $query->whereDate('date', now(config('booking.timezone'))->toDateString())->whereIn('status', ['pending', 'approved']),
+                    'bookings as pending_bookings_count' => fn ($query) => $query->where('status', 'pending'),
+                ])->when($request->filled('branch_id'), fn ($query) => $query->where('branch_id', $request->integer('branch_id')))->orderBy('name')->orderBy('id')->paginate(20)->withQueryString(),
         ]);
     }
 

@@ -1,56 +1,62 @@
-<article class="group flex min-w-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-surface shadow-sm transition-shadow hover:shadow-md" aria-labelledby="room-title-{{ $item->id }}">
-    <div class="relative border-b border-slate-100 bg-gradient-to-br from-secondaryLight/30 via-surface to-surface p-5 sm:p-6">
-        <div class="relative flex items-start justify-between gap-3">
-            <span class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primaryDark text-white shadow-sm"><x-schedule-icon name="room" class="h-6 w-6" /></span>
-            <span @class(['inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-semibold', 'border-secondaryLight bg-surface text-primaryDark' => $item->is_active, 'border-slate-200 bg-background text-slate-600' => ! $item->is_active])>
-                <span @class(['h-1.5 w-1.5 rounded-full', 'bg-primary' => $item->is_active, 'bg-muted' => ! $item->is_active]) aria-hidden="true"></span>
-                {{ $item->is_active ? 'Aktif' : 'Nonaktif' }}
-            </span>
+{{-- Kartu ringkas Daftar Ruangan (Admin). Data dari RoomController@index: branch, floor, facilities, pics, dan hitungan booking. --}}
+@php
+    $statusLabel = ['available' => 'Operasional', 'maintenance' => 'Dalam perawatan', 'unavailable' => 'Tidak dapat digunakan'][$item->status] ?? $item->status;
+    $facilityCount = $item->facilities->count();
+@endphp
+<article @class(['group flex min-w-0 flex-col rounded-2xl border bg-surface p-4 shadow-sm transition hover:border-secondary hover:shadow-md sm:p-5', 'border-slate-200' => $item->is_active, 'border-dashed border-slate-300 opacity-80' => ! $item->is_active]) aria-labelledby="room-title-{{ $item->id }}">
+    <div class="flex items-start gap-3">
+        <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primaryDark text-white"><x-schedule-icon name="room" class="h-5 w-5" /></span>
+        <div class="min-w-0 flex-1">
+            <h3 id="room-title-{{ $item->id }}" class="break-words text-base font-bold leading-6 text-primaryDark sm:text-lg">
+                <a href="{{ route('admin.rooms.show', $item) }}" class="hover:underline">{{ $item->name }}</a>
+            </h3>
+            <p class="mt-0.5 break-words text-sm leading-5 text-slate-600">{{ $item->code ?? 'Tanpa kode' }} &middot; {{ $item->floor?->name ?? 'Lantai belum ditentukan' }} &middot; {{ $item->branch?->name }}</p>
         </div>
-        <p class="relative mt-5 break-words text-sm font-semibold uppercase tracking-wider text-slate-500">Kode ruang · {{ $item->code ?? 'Belum ditentukan' }}</p>
-        <h3 id="room-title-{{ $item->id }}" class="relative mt-1.5 break-words text-xl font-bold leading-7 tracking-tight text-primaryDark">
-            <a href="{{ route('admin.rooms.show', $item) }}" class="hover:underline">{{ $item->name }}</a>
-        </h3>
-        <dl class="relative mt-5 grid grid-cols-1 gap-4 border-t border-secondaryLight/40 pt-4">
-            <div><dt class="text-sm text-slate-500">Kantor / Cabang</dt><dd class="mt-2 text-base font-semibold text-primaryDark">{{ $item->branch?->name }}</dd></div>
-            <div><dt class="text-sm text-slate-500">Lantai</dt><dd class="mt-2 break-words text-base font-semibold text-primaryDark">{{ $item->floor?->name ?? 'Belum ditentukan' }}</dd></div>
-        </dl>
+        <span @class(['inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold', 'bg-secondaryLight/30 text-primaryDark' => $item->is_active, 'bg-background text-slate-600' => ! $item->is_active])>
+            <span @class(['h-1.5 w-1.5 rounded-full', 'bg-primary' => $item->is_active, 'bg-muted' => ! $item->is_active]) aria-hidden="true"></span>{{ $item->is_active ? 'Aktif' : 'Nonaktif' }}
+        </span>
     </div>
 
-    <div class="flex flex-1 flex-col p-5 sm:p-6">
-        <div @class(['flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-lg px-3 py-2.5 text-sm', 'bg-secondaryLight/20 text-primaryDark' => $item->status === 'available', 'bg-background text-slate-700' => $item->status === 'maintenance', 'bg-danger/5 text-danger' => $item->status === 'unavailable'])>
-            <span>Status operasional</span>
-            <span class="font-semibold" title="{{ $item->status }}">{{ ['available' => 'Operasional', 'maintenance' => 'Dalam perawatan', 'unavailable' => 'Tidak dapat digunakan'][$item->status] ?? $item->status }}</span>
-        </div>
-        <dl class="mt-5 grid grid-cols-2 gap-4 text-base">
-            <div><dt class="text-sm text-slate-500">Akses ruangan</dt><dd class="mt-1.5 font-semibold text-primaryDark" title="{{ $item->access_type }}">{{ $item->access_type === 'all' ? 'Semua pegawai' : 'Unit tertentu' }}</dd></div>
-            <div><dt class="text-sm text-slate-500">Perlu approval</dt><dd class="mt-1.5 font-semibold text-primaryDark">{{ $item->requires_approval ? 'Ya, melalui PIC' : 'Tidak' }}</dd></div>
-        </dl>
+    <ul class="mt-4 flex flex-wrap gap-2 text-sm" aria-label="Pengaturan ruangan">
+        <li title="{{ $item->status }}" @class(['inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 font-medium', 'bg-secondaryLight/25 text-primaryDark' => $item->status === 'available', 'bg-warning/15 text-warningDark' => $item->status === 'maintenance', 'bg-danger/10 text-danger' => $item->status === 'unavailable'])>
+            <span @class(['h-1.5 w-1.5 rounded-full', 'bg-primary' => $item->status === 'available', 'bg-warning' => $item->status === 'maintenance', 'bg-danger' => $item->status === 'unavailable']) aria-hidden="true"></span>{{ $statusLabel }}
+        </li>
+        <li title="{{ $item->access_type }}" class="inline-flex items-center rounded-lg bg-background px-2.5 py-1 text-slate-700">
+            {{ $item->access_type === 'all' ? 'Semua pegawai' : 'Unit tertentu ('.$item->allowed_organizational_units_count.' unit)' }}
+        </li>
+        <li class="inline-flex items-center rounded-lg bg-background px-2.5 py-1 text-slate-700">Approval PIC: {{ $item->requires_approval ? 'Ya' : 'Tidak' }}</li>
+    </ul>
 
-        <div class="mb-5 mt-5 border-t border-slate-100 pt-4">
-            <div class="mb-3 flex items-center justify-between gap-3"><h4 class="text-sm font-semibold text-slate-600">Fasilitas</h4><span class="text-sm tabular-nums text-slate-500">{{ $item->facilities->count() }} fasilitas</span></div>
-            <div class="flex flex-wrap gap-2">
-                @forelse($item->facilities->take(3) as $facility)
-                    <span class="max-w-full break-words rounded-lg border border-slate-200/80 bg-background/50 px-2.5 py-1.5 text-sm leading-5 text-slate-600">{{ $facility->name }}</span>
-                @empty
-                    <p class="text-sm leading-5 text-slate-500">Belum ada fasilitas.</p>
-                @endforelse
-            </div>
-            @if($item->facilities->count() > 3)
-                <details class="mt-2">
-                    <summary class="w-fit cursor-pointer rounded py-2 text-sm font-semibold text-primary hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">Lihat {{ $item->facilities->count() - 3 }} fasilitas lainnya<span class="sr-only"> untuk {{ $item->name }}</span></summary>
-                    <div class="mt-1 flex flex-wrap gap-2">
-                        @foreach($item->facilities->skip(3) as $facility)
-                            <span class="max-w-full break-words rounded-lg border border-slate-200/80 bg-background/50 px-2.5 py-1.5 text-sm leading-5 text-slate-600">{{ $facility->name }}</span>
-                        @endforeach
-                    </div>
-                </details>
+    <dl class="mt-4 grid grid-cols-3 divide-x divide-slate-200 rounded-xl border border-slate-200 text-center">
+        <div class="px-2 py-2.5"><dt class="text-xs text-slate-500">Booking hari ini</dt><dd class="mt-0.5 text-lg font-bold tabular-nums text-primaryDark">{{ $item->today_bookings_count }}</dd></div>
+        <div class="px-2 py-2.5"><dt class="text-xs text-slate-500">Menunggu PIC</dt><dd @class(['mt-0.5 text-lg font-bold tabular-nums', 'text-warningDark' => $item->pending_bookings_count > 0, 'text-primaryDark' => ! $item->pending_bookings_count])>{{ $item->pending_bookings_count }}</dd></div>
+        <div class="px-2 py-2.5"><dt class="text-xs text-slate-500">Fasilitas</dt><dd class="mt-0.5 text-lg font-bold tabular-nums text-primaryDark">{{ $facilityCount }}</dd></div>
+    </dl>
+
+    <div class="mt-4 space-y-2 text-sm leading-5">
+        <p class="flex gap-2"><span class="w-16 shrink-0 text-slate-500">PIC</span>
+            @if($item->pics->isNotEmpty())
+                <span class="min-w-0 break-words font-medium text-text">{{ $item->pics->pluck('name')->join(', ') }}</span>
+            @else
+                <span class="font-semibold text-danger">Belum ada PIC</span>
             @endif
-        </div>
-
-        <div class="mt-auto grid grid-cols-1 gap-3 border-t border-slate-100 pt-5">
-            <a href="{{ route('admin.rooms.show', $item) }}" class="flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-base font-semibold text-white transition hover:bg-primaryDark" aria-label="Kelola {{ $item->name }}">Kelola<x-schedule-icon name="arrow" class="h-4 w-4 shrink-0" /></a>
+        </p>
+        <div class="flex gap-2"><span class="w-16 shrink-0 text-slate-500">Fasilitas</span>
+            <div class="flex min-w-0 flex-wrap gap-1.5">
+                @forelse($item->facilities->take(3) as $facility)
+                    <span class="max-w-full break-words rounded-md bg-background px-2 py-0.5 text-slate-700">{{ $facility->name }}</span>
+                @empty
+                    <span class="text-slate-500">Belum ada</span>
+                @endforelse
+                @if($facilityCount > 3)
+                    <span class="rounded-md px-1 py-0.5 font-medium text-slate-500" title="{{ $item->facilities->skip(3)->pluck('name')->join(', ') }}">+{{ $facilityCount - 3 }} lainnya</span>
+                @endif
+            </div>
         </div>
     </div>
 
+    <div class="mt-auto flex gap-2 pt-4">
+        <a href="{{ route('admin.rooms.show', $item) }}" class="inline-flex min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primaryDark" aria-label="Kelola {{ $item->name }}">Kelola<x-schedule-icon name="arrow" class="h-4 w-4 shrink-0" /></a>
+        <a href="{{ route('admin.schedule.index') }}" class="inline-flex min-h-[40px] items-center justify-center gap-1.5 rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-primary transition hover:bg-background" aria-label="Lihat jadwal {{ $item->name }}"><x-schedule-icon name="calendar" class="h-4 w-4 shrink-0" />Jadwal</a>
+    </div>
 </article>
