@@ -1,8 +1,8 @@
 # Latar pendataan tamu
 
 - Mode: built-in imagegen, gambar baru tanpa referensi.
-- Aset aplikasi: `public/images/guest-harbor-background.png` (1536 x 1024).
-- Dipakai hanya pada form `/tamu`, dengan opacity dan lapisan gradient token aplikasi. Halaman jadwal tidak memakai gambar ini. Revisi 2026-10-20 menampilkan pelabuhan multipurpose non-peti kemas: kapal kargo umum, crane kapal, gudang, curah dan gulungan baja. URL aset diberi versi noncontainer agar browser mengambil gambar baru.
+- Aset aplikasi: `public/images/home-harbor.jpg` (1536 x 1024, JPEG ~150 KB). Sejak 2026-11-24 PNG asli (2 MB) dikonversi ke JPEG dan gambar yang sama juga menjadi hero beranda (DEC-066).
+- Dipakai pada hero beranda `/` dan form `/tamu`, dengan opacity dan lapisan gradient token aplikasi. Halaman jadwal tidak memakai gambar ini. Revisi 2026-10-20 menampilkan pelabuhan multipurpose non-peti kemas: kapal kargo umum, crane kapal, gudang, curah dan gulungan baja.
 
 Prompt final:
 

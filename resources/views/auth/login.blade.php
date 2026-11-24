@@ -27,7 +27,7 @@
             
             <!-- Continuous Port Photo across the entire card -->
             <div aria-hidden="true" class="pointer-events-none absolute inset-0 z-0">
-                <img src="{{ asset('images/login-port.jpg') }}" alt="" class="h-full w-full object-cover object-center">
+                <img src="{{ asset('images/home-harbor.jpg') }}" alt="" class="h-full w-full object-cover object-[35%_center]">
             </div>
 
             <!-- Left Column: Port Photo & Branding Hero (7 cols / ~58%) -->

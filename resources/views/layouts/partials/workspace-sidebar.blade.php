@@ -2,8 +2,8 @@
 <aside class="relative flex flex-col bg-[#0A234E] text-white lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto">
     <!-- Sidebar Port Graphic Background -->
     <div aria-hidden="true" class="pointer-events-none absolute inset-0 z-0 overflow-hidden select-none">
-        <img src="{{ asset('images/sidebar-port.jpg') }}" alt="" class="h-full w-full object-cover object-top opacity-85">
-        <div class="absolute inset-0 bg-gradient-to-b from-[#0A234E]/25 via-transparent to-[#0A234E]/50"></div>
+        <img src="{{ asset('images/home-harbor.jpg') }}" alt="" class="h-full w-full object-cover object-[22%_center] opacity-40">
+        <div class="absolute inset-0 bg-gradient-to-b from-[#0A234E]/95 via-[#0A234E]/85 to-[#0A234E]/60"></div>
     </div>
 
     <div class="relative z-10 flex items-center justify-between px-7 py-8">
