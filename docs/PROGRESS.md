@@ -2,6 +2,15 @@
 
 ## Last Update
 
+2026-11-24 - Redesign beranda dan dashboard, header keamanan, README (DEC-066).
+
+- Beranda: hero foto pelabuhan non-peti kemas (`home-harbor.jpg`), konten diringkas (Cara kerja, peran pengguna, ajakan tamu). Navbar publik dan header tamu diperbarui; footer bersama diringkas.
+- Dashboard Pegawai/PIC/Admin memakai `x-dashboard-hero` dan `x-stat-card`. Pegawai: rapat mendatang, menunggu persetujuan, pengajuan bulan ini, dan 4 booking mendatang. PIC: 5 approval Pending terdekat. Admin: role, lokasi, dan unit kerja di banner.
+- Semua gambar peti kemas diganti (login, sidebar, banner dashboard); 15 gambar tidak terpakai dihapus.
+- Keamanan: middleware `SecurityHeaders`. Audit tidak menemukan celah otorisasi, mass assignment, XSS, atau secret ter-commit; CSP belum dipasang.
+- README ditulis ulang: fitur, peran, alur (Mermaid), arsitektur, keamanan, dan screenshot di `docs/screenshots/` (tanpa Admin karena password akun admin di DB bersama bukan password development).
+- Verifikasi: `view:cache` dan `npm run build` berhasil; tampilan dicek lewat screenshot headless Chrome (desktop dan mobile). DashboardContentTest dan SecurityHeadersTest: 4 lulus. Batch HomeAndSchedule/Example/FrontendSkeleton/PicDashboardBanner/AdminDashboard/Authorization/Authentication/BranchAdmin/PicApprovalNotificationBadge/GuestRegistration masih berjalan saat commit.
+
 2026-11-19 - Footer tunggal, kartu Daftar Ruangan, dan pembersihan view (DEC-065).
 
 - Footer beranda menjadi `shared/footer` di semua layout (publik, login, pegawai, workspace, tamu). Kartu Daftar Ruangan Admin diringkas (grid hingga 4 kolom) dengan booking hari ini, menunggu PIC, nama PIC, jumlah unit restricted, serta tombol Kelola dan Jadwal.

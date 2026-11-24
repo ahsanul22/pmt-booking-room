@@ -1,5 +1,14 @@
 # Decisions
 
+## DEC-066 - Redesign beranda dan dashboard, header keamanan
+
+- Permintaan pengguna 2026-11-24: gambar beranda (`Beranda.jpeg`, ruang rapat AI dengan logo terbalik) tidak disukai. Hero beranda kini memakai foto pelabuhan yang sama dengan latar `/tamu`, dikonversi ke `public/images/home-harbor.jpg` (~150 KB dari 2 MB). Konten beranda diringkas menjadi hero, Cara kerja (3 langkah), peran pengguna, dan ajakan untuk tamu. Tetap tanpa tautan/data jadwal (DEC-031 diganti oleh arahan 2026-10-19).
+- Navbar publik dan header tamu memakai logo + label halaman; footer bersama diringkas (logo, kontak, tanpa tautan Login/Dashboard).
+- Dashboard ketiga peran memakai komponen bersama `x-dashboard-hero` dan `x-stat-card`. Dashboard pegawai menampilkan data nyata: jumlah rapat mendatang (Approved), menunggu persetujuan, pengajuan bulan ini, serta 4 booking mendatang milik sendiri. Dashboard PIC menampilkan 5 approval Pending terdekat dengan cakupan yang sama dengan antrean approval (`User::pendingApprovalsQuery()`). Dashboard Admin tetap berfokus pada administrasi (DEC-050), ditambah ringkasan role, lokasi, dan unit kerja.
+- Middleware global `SecurityHeaders` menambah `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, `Cross-Origin-Opener-Policy`, dan HSTS bila HTTPS. CSP belum dipasang karena Livewire dan Vite dev memakai skrip inline.
+- Arahan pengguna 2026-11-24: Pelindo Multi Terminal adalah terminal non-peti kemas, jadi gambar tidak boleh menampilkan peti kemas. `login-port.jpg` (login) dan `sidebar-port.jpg` (sidebar workspace) diganti `home-harbor.jpg`; banner dashboard juga memakai gambar itu. Gambar baru harus mengikuti aturan ini.
+- 15 gambar yang tidak lagi dirender dihapus dari `public/images`.
+
 ## DEC-065 - Footer tunggal dan kartu Daftar Ruangan ringkas
 
 - Tema gelap sempat dibuat (token warna via variabel CSS) lalu dibatalkan atas penilaian pengguna 2026-11-19 karena tampilannya kurang baik; tidak ada sisa kode tema gelap.
