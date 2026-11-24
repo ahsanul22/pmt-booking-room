@@ -9,7 +9,7 @@
 - Semua gambar peti kemas diganti (login, sidebar, banner dashboard); 15 gambar tidak terpakai dihapus.
 - Keamanan: middleware `SecurityHeaders`. Audit tidak menemukan celah otorisasi, mass assignment, XSS, atau secret ter-commit; CSP belum dipasang.
 - README ditulis ulang: fitur, peran, alur (Mermaid), arsitektur, keamanan, dan screenshot di `docs/screenshots/` (tanpa Admin karena password akun admin di DB bersama bukan password development).
-- Verifikasi: `view:cache` dan `npm run build` berhasil; tampilan dicek lewat screenshot headless Chrome (desktop dan mobile). DashboardContentTest dan SecurityHeadersTest: 4 lulus. Batch HomeAndSchedule/Example/FrontendSkeleton/PicDashboardBanner/AdminDashboard/Authorization/Authentication/BranchAdmin/PicApprovalNotificationBadge/GuestRegistration masih berjalan saat commit.
+- Verifikasi: `view:cache` dan `npm run build` berhasil; tampilan dicek lewat screenshot headless Chrome (desktop dan mobile). DashboardContentTest dan SecurityHeadersTest: 4 lulus. Batch HomeAndSchedule/Example/FrontendSkeleton/PicDashboardBanner/AdminDashboard/Authorization/Authentication/BranchAdmin/PicApprovalNotificationBadge/GuestRegistration: 67 lulus, 1 gagal. Yang gagal adalah AuthorizationTest admin pages; di batch itu muncul sebagai error koneksi DB, dan saat diulang gagal karena assertion `Belum ada booking.`. Teks itu tidak ada di dashboard Admin sejak DEC-050, jadi kegagalan ini sudah ada sebelum perubahan ini. AuthenticationTest login tiga akun dan AuthorizationTest missing unit kini lulus.
 
 2026-11-19 - Footer tunggal, kartu Daftar Ruangan, dan pembersihan view (DEC-065).
 
