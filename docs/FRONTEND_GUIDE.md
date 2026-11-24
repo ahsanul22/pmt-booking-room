@@ -28,6 +28,7 @@ layouts/app.blade.php          satu-satunya <html>/<head>, @vite, page-loading
 ├── layouts/visitor            /tamu
 └── layouts/report             cetak / PDF laporan
 layouts/partials/              workspace-sidebar, workspace-topbar, employee-navbar, skip-link
+shared/footer                  satu footer untuk semua layout (publik, login, pegawai, workspace, tamu)
 ```
 
 Halaman hanya menulis `@extends` satu nama layout lalu mengisi `title`, `breadcrumb` (workspace), dan `content`. Tambahan di `<head>` atau script memakai `@push('head')` / `@push('scripts')`. Menu sidebar diubah di `layouts/partials/workspace-sidebar.blade.php`; jumlah approval disuntikkan ke partial itu oleh view composer di `AppServiceProvider`.

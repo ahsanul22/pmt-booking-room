@@ -2,6 +2,13 @@
 
 ## Last Update
 
+2026-11-19 - Footer tunggal, kartu Daftar Ruangan, dan pembersihan view (DEC-065).
+
+- Footer beranda menjadi `shared/footer` di semua layout (publik, login, pegawai, workspace, tamu). Kartu Daftar Ruangan Admin diringkas (grid hingga 4 kolom) dengan booking hari ini, menunggu PIC, nama PIC, jumlah unit restricted, serta tombol Kelola dan Jadwal.
+- Tema gelap sempat dibuat lalu dihapus atas penilaian pengguna; tidak ada kode tersisa.
+- Dihapus 10 view yang tidak dirender: `admin/rooms/pics`, `admin/rooms/_status`, `admin/users/_status`, `shared/room-details`, `shared/welcome-footer`, komponen `field`, `select`, `textarea`, `skeleton-form`, `pending-action`.
+- Verifikasi: `view:cache` dan `npm run build` berhasil. RoomManagementTest, FrontendSkeletonTest, GuestRegistrationTest, HomeAndScheduleTest, BranchAndItSupportTest, AuthenticationTest: 60 lulus, 1 gagal (AuthenticationTest login tiga akun, mencari teks "Direktorat SDM"; sudah gagal sebelum perubahan). Ekstensi Chrome tidak terhubung, tampilan belum diperiksa di browser.
+
 2026-11-19 - Unit akses ruangan restricted di form ruangan (DEC-064).
 
 - Checkbox unit organisasi ditambahkan ke form Tambah/Kelola Ruangan dan disimpan bersama data ruangan; tampil hanya saat Jenis Akses = Unit tertentu (`resources/js/room-access.js`). Ruangan restricted wajib minimal satu unit; untuk "Semua pegawai" input unit diabaikan dan daftar lama dipertahankan.

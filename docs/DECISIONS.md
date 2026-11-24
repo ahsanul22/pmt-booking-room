@@ -1,5 +1,12 @@
 # Decisions
 
+## DEC-065 - Footer tunggal dan kartu Daftar Ruangan ringkas
+
+- Tema gelap sempat dibuat (token warna via variabel CSS) lalu dibatalkan atas penilaian pengguna 2026-11-19 karena tampilannya kurang baik; tidak ada sisa kode tema gelap.
+- Footer beranda (sebelum login) menjadi `shared/footer` untuk semua layout, termasuk layout tamu; footer lama diganti dan `shared/welcome-footer` dihapus.
+- Kartu Daftar Ruangan Admin dibuat ringkas (4 kolom di layar lebar) dan ditambah info: booking hari ini, menunggu PIC, nama PIC (peringatan bila kosong), dan jumlah unit untuk ruangan restricted.
+- View yang tidak dirender di mana pun dihapus: `admin/rooms/pics`, `admin/rooms/_status`, `admin/users/_status`, `shared/room-details`, komponen `field`, `select`, `textarea`, `skeleton-form`, `pending-action`.
+
 ## DEC-064 - Unit akses ruangan restricted dipilih di form ruangan
 
 - Arahan pengguna 2026-11-19: Jenis Akses "Unit tertentu" tetap dipertahankan (contoh: ruang Direksi lantai 8). Sejak commit `cb63dac` bagian pilihan unit ter-comment, sehingga ruangan restricted baru tidak dapat diberi unit dan tidak dapat dibooking siapa pun.
